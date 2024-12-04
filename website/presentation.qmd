@@ -42,7 +42,7 @@ The symptom and signs are as follows:
 
 - It’s a public dataset contains records of patients who were diagnosis with AIDS.
   
-- The data contained 2139 intances, include integer and catugoriacal variables
+- The data contained 2139 instances, include integer and categorical variables
 
 ### Project Goal
 
@@ -115,11 +115,6 @@ Methodology that will be included in this project would be survival analysis and
 ### Pie Chart for Diagnoisis Outcome distribution
 ![](figures/eda/eda_plot_8.png){width=80%}
 
-### Correlation Heatmap of Karnofsky score
-
-![](figures/eda/eda_plot_10.png){width=80%}
-
-* The positive correlation between the Karnofsky score and CD4 counts suggests that patients with better functional abilities
 
 
 ## Survival Analysis
@@ -318,7 +313,7 @@ Tabel: Model Comparasion
 | Decision Tree   | 0.7294 | `cd420` `offtrt`  `age`  `preanti`  `cd40`  `gender` |
 | Random Forest  | 0.7686 | `offtrt` `cd420` `preanti` `age` `homo` `z30` `strat` `gender` `cd40` `cd80` |
 
-4. What are the most important indicators/features that better give the diagnois result?
+4. What are the most important indicators/features that better give the diagnosis result?
 
 - gender
 - age
