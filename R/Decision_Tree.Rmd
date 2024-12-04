@@ -1,0 +1,143 @@
+---
+title: "Decision_Tree"
+author: "Xue Qin"
+date: "2024-10-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rpart)
+library(caret)  
+library(dplyr)
+
+data <- read.csv("../data/derived-data/data_scaled_950.csv")
+
+# Binary columns (don't scale these)
+binary_cols <- c("hemo", "homo", "drugs", "karnof", "oprior", "z30", "zprior", 
+                "preanti", "race", "gender", "str2", "strat", "symptom", 
+                "treat", "offtrt")
+
+# Survival variables (don't scale these)
+survival_cols <- c("time", "cid")
+
+# Get all column names
+all_cols <- names(data)
+
+# Identify continuous columns to scale
+# (those not in binary_cols and not in survival_cols)
+continuous_cols <- setdiff(all_cols, c(binary_cols, survival_cols))
+
+# Create new dataframe
+data_scaled <- data
+
+# Scale only continuous variables
+data_scaled[continuous_cols] <- scale(data[continuous_cols])
+
+# Binary and survival variables remain unchanged
+data_scaled[binary_cols] <- data[binary_cols]
+data_scaled[survival_cols] <- data[survival_cols]
+```
+
+
+```{r}
+library(caret)
+
+set.seed(123)
+
+trainIndex <- createDataPartition(data_scaled$cid, p = 0.7, list = FALSE)
+
+train_data <- data_scaled[trainIndex, ]
+test_data <- data_scaled[-trainIndex, ]
+```
+
+```{r}
+train_data$cid <- as.factor(train_data$cid)
+test_data$cid <- as.factor(test_data$cid)
+```
+
+Feature Selection: using a recursive feature elimination approach
+
+
+
+
+```{r}
+library(rpart)
+library(rpart.plot)
+ # Fit decision tree
+ tree_model <- rpart(cid ~ age + trt + wtkg + hemo + homo + drugs + karnof+oprior+z30+zprior+preanti+race+gender+str2+strat+symptom+treat+offtrt+cd40+cd420+cd80+cd820, data = train_data)
+# Plot
+rpart.plot(tree_model)
+
+```
+
+
+```{r}
+test_pred_class <- predict(tree_model, newdata = test_data, type = "class")
+
+confusionMatrix(factor(test_pred_class), factor(test_data$cid))
+```
+
+
+## feature importance
+
+```{r}
+# Extract feature importance from the rpart model
+importance <- tree_model$variable.importance
+
+# Sort importance scores and preserve names
+sorted_importance <- sort(importance, decreasing = TRUE)
+
+# Display sorted importance scores with names
+print(sorted_importance)
+
+# Select the top 10 features
+selected_features <- names(sorted_importance)[1:6]
+print(selected_features)
+
+# Create a formula using the top 10 features
+formula <- as.formula(paste("cid ~", paste(selected_features, collapse = " + ")))
+print(formula)
+
+# Refit the decision tree model with selected features
+tree_model_selected <- rpart(formula, data = train_data)
+
+# Plot the new decision tree
+rpart.plot(tree_model_selected)
+
+# Make predictions and evaluate
+test_pred_class <- predict(tree_model_selected, newdata = test_data, type = "class")
+conf_matrix <- confusionMatrix(factor(test_pred_class), factor(test_data$cid))
+
+# Print the confusion matrix
+print(conf_matrix)
+```
+
+```{r}
+
+library(viridis)
+
+# Extract the confusion matrix table
+conf_matrix_table <- conf_matrix$table
+
+# Convert the table to a data frame for ggplot
+conf_matrix_df <- as.data.frame(as.table(conf_matrix_table))
+
+# Create heatmap using the viridis "volcano" color scheme
+ggplot(conf_matrix_df, aes(x = Prediction, y = Reference, fill = Freq)) +
+  geom_tile(color = "white") +
+  scale_fill_viridis(option = "C", name = "Frequency") + # Use "C" for the volcano scheme
+  labs(
+    title = "Confusion Matrix Heatmap",
+    x = "Predicted",
+    y = "Actual"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+

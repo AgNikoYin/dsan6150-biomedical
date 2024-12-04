@@ -1,0 +1,133 @@
+---
+title: "Survival Analysis"
+subtitle: "Group #6"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+---
+
+This page presents an exploration of survival outcomes based on the analysis of patient data using Kaplan-Meier and Cox proportional hazard models. By applying these methods, we examine the influence of key variables like ARV History, Symptom, and Karnofsky score. Our findings offer valuable insights into how these factors may shape the survival probabilities for patients taking different treatments, guiding both clinical decisions and future research.
+
+# Analyze Survival Probabilities Across Treatments
+
+The survival analysis begins with developing the Kaplan-Meier survival probabilities for the four treatment groups: trt=0, trt=1, trt=2, and trt=3 where 0 = ZDV only; 1 = ZDV + ddI, 2 = ZDV + Zal, 3 = ddI only. 
+
+![Kaplan-Meier Curve for All Treatments](figures/survival/surv_plot_1.png){width=600 height=400}
+
+The plot reveals a significant difference in survival probabilities across treatments, with trt=0 showing a significant worse outcomes compared to the other three treatments indicating by the p-value < 0.0001. Patients who toke trt=1, trt=2, and trt=3 shows similar survival curves. These suggest that treatment 0 is less effective compared with the other three treatments, and further investigation is needed to see if specific factors that may influence survival within the remaining three treatments.
+
+# Focus on Effective Treatments: Survival Differences in trt=1,2,3
+
+![Kaplan-Meier Curve for Treatments 1, 2, and 3](figures/survival/surv_plot_2.png){width=700 height=400}
+
+When isolating the three more effective treatments (trt=1, trt=2, and trt=3),this graph demonstrates that the survival probabilities across these treatments are nearly indistinguishable according to the p-value = 0.4. This similarity implies that external factors -- other than treatments themselves --may play a role in shaping the survival outcomes.
+
+To discover potential variations, we are going to analyze how demographic and other clinical factors affect survival probabilities within each treatment group.
+
+# Explore Factors That Affect Survival Probabilities Using the Bootstrap Method
+
+To ensure a robust analysis of the factors influencing survival probabilities, we employed a bootstrap resampling method. This approach could addresses potential imbalances in the data such as uneven distribution of patients across treatment groups or demographic categories. And this method allows us to create multiple balanced datasets for analysis and they can ensure that the observed patterns in survival outcomes are not overly influenced by biases in the dataset.
+
+### 1. Gender
+
+![Survival Curves Stratified by Gender](figures/survival/surv_plot_3.png){width=1000 height=700}
+
+The survival curves for each treatment group stratified by gender show that gender may significantly influence the survival probability for certain treatment. 
+For trt=0, gender significantly impacts survival probabilities (p-value = 0.024), with female showing higher survival probabilities. However, gender differences are less significant for trt=1, trt=2, and trt=3 (p-values = 0.35, 0.061, and 0.79).
+
+
+### 2. Race
+
+![Survival Curves Stratified by Race](figures/survival/surv_plot_4.png){width=1000 height=700}
+
+When stratifying by race, the survival probabilities across all treatments show no significant differentce as p-values range from 0.22 to 0.96. This indicates that race does not have a big influence on survival outcomes within any of the treatment groups.
+
+### 3. ARV History
+
+![Survival Curves Stratified by ARV History](figures/survival/surv_plot_5.png){width=1000 height=700}
+
+ARV history means the whether the patient has ever taken the antiretroviral treatments, which is the treatment of HIV/AIDS involves treatment of opportunistic infections, prophylaxis, and antiretroviral (ARV) therapy. Stratifying by ARV history allows us to explore how prior exposure to antiretroviral therapy would impact survival outcomes -- patients with prior ARV treatment might have developed drug resistance, reducing the effectiveness of subsequent treatments.
+
+From the survival curves we can conclude that using trt=1, antiretroviral history (naive vs. experienced) does not significantly impact survival outcomes for patients. This means that previous exposure to antiretroviral therapy (ARV) does not appear to reduce the effectiveness of Treatment 1 in a statistically significant way. However, using trt=0, trt=2, and trt=3, ARV history has a substantial impact on survival probabilities. Patients with prior ARV treatment show significantly lower survival probabilities compared to naive patients due to the impact of drug resistance.
+
+### 4. Symptom
+
+![Survival Curves Stratified by Symptom](figures/survival/surv_plot_6.png){width=1000 height=700}
+
+For trt=0 and trt=3, the p-values (0.11 and 0.38) indicate no statistically significant difference in survival probabilities between symptomatic and asymptomatic patients, suggesting that symptom status has no meaningful effect on survival in these treatment groups. 
+
+However, for trt=1, the p-value (0.0039) shows a significant difference, where asymptomatic patients exhibit slightly better survival probabilities compared to symptomatic patients. The most striking difference is observed in Treatment 2, where the p-value (p<0.0001) and the clear divergence of the survival curves indicate a strong association between symptom status and survival, with asymptomatic patients having markedly better survival outcomes.
+
+### 5. Karnofsky Score
+
+![Survival Curves Stratified by Karnofsky Quantile](figures/survival/surv_plot_8.png){width=1000 height=700}
+
+Karnofsky score measures a patient's functional status on a scale from 0 to 100, with higher scores indicating better physical capability and ability to carry out daily activities. To better understand the impact of patient's functional status, we divided the Karnofsky scores into four quartiles (Q1 being the lowest and Q4 the highest) and analyzed survival probabilities for each treatment group. 
+
+Based on the curves, there is no significant difference in survival probabilities for patients using treatment 0, 1, and 3. However, Karnofsky score quartiles significantly impact survival probabilities (p = 0.038), with higher quartiles (Q3 and Q4) associated with improved survival outcomes if patients receiving trt=2. This indicates that functional status is a critical factor for patients receiving Treatment 2.
+
+### 6. CD4 at Baseline
+
+![Survival Curves Stratified by CD4 Quantile](figures/survival/surv_plot_10.png){width=1000 height=700}
+
+The CD4 cell count is a critical measure of immune system health, particularly for patients with HIV/AIDS. It reflects the number of CD4 T-helper cells in the blood, which are essential for immune function. A higher CD4 count indicates better immune health, while lower counts are associated with a higher risk of opportunistic infections and worse health outcomes. To examine the relationship between CD4 levels and survival, we again divided CD4 counts into quartiles (Q1 being the lowest and Q4 the highest) and analyzed survival probabilities for each treatment group.
+
+According to the p-values, the results show a consistent and significant impact of CD4 quartiles on survival probabilities across all treatment groups: survival probabilities significantly improve with higher CD4 quartiles, saying that immune status is a key determinant of survival outcomes for all groups and patients with higher CD4 consistently demonstrate better survival probabilities, highlighting the importance of immune health in determining treatment effectiveness.
+
+
+# From Kaplan-Meier Curves to Cox Proportional Hazards Models
+
+The Kaplan-Meier (KM) curves provide a fundational view of survival probabilities by visualizing unadjusted survival outcomes across different strata, such as treatment groups or CD40 categories. While the KM curves effectively highlight survival differences between groups, they do not account for other important covariates that may influence survival, such as age, gender, Karnofsky scores, and clinical symptoms. To address this limitation and uncover the independent effects of multiple factors, we transitioned to Cox proportional hazards models.
+
+The Cox proportional hazards model is a semi-parametric approach that allows for the simultaneous inclusion of multiple covariates. And it can adjust for confounding factors, ensuring a clearer understanding of each variable's independent effect on survival. Besides, it can explore interactions between variables, such as the influence of treatment (trt) on survival, stratified by CD40 levels or Karnofsky scores.
+
+### 1. Cox Model with Interaction Terms
+
+By running a Cox model that includes interaction terms to evaluate how the effect of treatment (trt) on survival changes depending on patient characteristics (e.g., Karnofsky score, CD40 level, ARV History and symptom presence), this Adjusted Survival Curves is derived.
+
+![Adjusted Survival Curves by Treatment](figures/survival/surv_plot_12.png){width=600 height=400}
+
+From this graph we can examine the survival differences after accounting for multiple covariates and interaction effects. Treatment 0 consistently shows significantly lower survival probabilities compared to Treatments 1, 2, and 3, even after adjustment for other factors. And Treatments 1, 2, and 3 still exhibit relatively similar adjusted survival probabilities, indicating comparable effectiveness in improving survival.
+
+Before adjusting for multiple covariates and interaction effects, Treatment 1 initially shows the highest survival probabilities toward the end of the study period; however, after dealing with these adjustments, Treatment 2 appears to have the highest survival probabilities at the end of study.
+
+Table: P-values from Schoenfeld Residual Test
+
+|  | chisq | df | P-Value  |
+|--------|--------|--------|--------|
+| trt | 9.292 | 3 | 0.02566 |
+| karnof | 0.994 | 1 | 0.31875 |
+| str2 | 0.067 | 1 | 0.79572 |
+| symptom | 1.636 | 1 | 0.20089 |
+| cd40 | 13.246 | 1 | 0.00027 |
+| trt:karnof | 10.686 | 3 | 0.01355 |
+| trt:str2 |  3.168 | 3 | 0.36644 |
+| trt:symptom | 0.840 | 3 | 0.83998 |
+| trt:cd40 | 18.346 | 3 | 0.00037 |
+| GLOBAL | 36.678 | 19 | 0.00870 |
+
+However, the Schoenfeld residual test output above reveals that there is significant violations of the proportional hazards assumptions since the p-value for global test is 0.0087. Also, specific variables, such as cd40 (p = 0.00027) and the interaction trt:cd40 (p = 0.00037), show significant violations, suggesting that their effects on the hazard ratio change over time. This suggesting that a stratified approach was necessary.
+
+### 2. Stratified Cox Model
+
+By stratifying on CD4 at baseline, the model accounts for its non-proportional effect while allowing the estimation of hazard ratios for other covariates (e.g., treatment, Karnofsky score) within each CD40 stratum.
+
+![Survival Curves Stratified by CD4 Categories](figures/survival/surv_plot_13.png){width=600 height=400}
+
+The survival curves stratified by CD40 categories (Low, Lower-Mid, Upper-Mid, and High) highlight the significant impact of baseline CD40 levels on survival outcomes. Patients in the Low CD40 category (red curve) consistently exhibit the poorest survival probabilities, with a steeper decline in survival over time. In contrast, patients in the High CD40 category (purple curve) have the best survival outcomes, reflecting a protective effect of stronger immune function. 
+
+Table: P-values from Schoenfeld Residual Test
+
+|   | chisq | df | P-Value |
+|--------|--------|--------|--------|
+|trt  | 10.64121 | 3| 0.014 |
+|age |  0.83469 | 1 | 0.361 |
+|gender | 0.00647 | 1| 0.936 |
+|karnof | 0.18116 | 1| 0.670 |
+|str2 |  0.02932 | 1| 0.864 |
+|symptom | 0.43114 | 1 | 0.511 |
+|GLOBAL | 11.86747 | 8 | 0.157 |
+
+
+The stratified Cox model confirms that CD40 is a critical prognostic factor for survival. By stratifying on CD40, we address the violation of the proportional hazards assumption for this variable as the global Schoenfeld test for the stratified model shows no significant violations (p = 0.157), enabling us to accurately assess the effects of other covariates (e.g., treatment, Karnofsky score, symptoms) within each CD40 category. These findings emphasize the importance of considering baseline immune status when interpreting survival outcomes and tailoring treatments, as patients with higher CD40 levels consistently achieve better survival probabilities regardless of treatment group.

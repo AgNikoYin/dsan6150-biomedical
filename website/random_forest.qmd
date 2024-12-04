@@ -1,0 +1,123 @@
+---
+title: "Random Forest Model"
+subtitle: "Group #6"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+---
+
+The Random Forest model was developed as part of the survival analysis to predict survival probabilities patients who have been diagnosed with AIDS based on multiple covariates. This page outlines the key steps involved in building and validating the Random Forest model, providing insights into its performance and interpretability.
+
+# Step 1: Data Preparation
+
+Before training the Random Forest model, two preprocessing steps were taken to ensure the data is suitable for the model. 
+
+For numerical variables that are not categorical, scaling was applied to standardize their ranges. This ensures that all continuous variables are on a comparable scale, and prevents variables with larger ranges from disproportionately influence the model.
+
+Additionally, we filtered the dataset to include only observations where time < 290. This threshold was chosen because it ensured an even distribution of the outcome variable cid (value 0 and 1). It is important to maintain a balanced dataset in order to reduce the potential bias in the model and improve its ability to generalize to new data.
+
+|  | Before Filtering | After Filtering | 
+|--------|--------|--------|
+| cid = 0 | 1627 | 377 | 
+| cid = 1 | 521 | 474 | 
+
+Also, for training and evaluating purpose, the dataset was split into a training set and a testing set where 70% of the data used to train the model while the remaining 30% of the data is used for evaluation.
+
+# Step 2: Model Training
+
+## Initial Random Forest Model
+
+The first Random Forest Model was built using all variables in the dataset to predict the outcome variable cid. The formula incorporated 22 predictors, including key covariates such as age, treatment group (trt), wtkg (weight), hemo (hemoglobin), karnof (Karnofsky score), cd40 (immune status), and other clinical and demographic factors.
+
+The model was trained on the train_data subset with the following specifications:
+
+- Number of Trees (ntree): 500 decision trees were grown to ensure a robust ensemble model.
+- Number of Variables Tried at Each Split (mtry): 3 variables were randomly selected at each split to balance accuracy and computational efficiency.
+
+![](figures/randomforest/rf_plot_1.png)
+
+The model achieved an Out-of-Bag error rate of 25%, which measures the model's performance on unseen data during training. The confusion matrix provides further insight into the model's predictive accuracy:
+
+Table: Confusion Matrix of Initial Random Forest Model
+
+|  | 0 | 1| 
+|--------|--------|--------|
+| 0 | 193 | 79 | 
+| 1 | 70 | 254 | 
+
+For class 0, 193 instances were correctly predicted, with a class error of 29%.
+For class 1, 254 instances were correctly predicted, with a class error of 21.6%.
+
+This initial model was evaluated on the test dataset, and the results are summarized in the confusion matrix and associated performance metrics.
+The model achieved an accuracy of 75.29%, with a 95% confidence interval of (69.53%, 80.46%). This indicates that the model correctly classified approximately three-quarters of the test observations.
+
+Table: Confusion Matrix of Initial Random Forest Model on Test Dataset
+
+|  | 0 | 1| 
+|--------|--------|--------|
+| 0 | 78 | 36 | 
+| 1 | 27 | 114 | 
+
+The sensitivity of 74.29% shows that the model correctly identified 74.29% of instances belonging to class 0 (true positives). And the specificity of 76.00% reflects the model’s ability to correctly identify 76.00% of instances belonging to class 1 (true negatives).
+
+Table: Initial Random Forest Model Result
+
+| Metric  | Value  |
+|--------|--------|
+| Accuracy  | 0.7529 |
+| Sensitivity   | 0.7429 |
+| Specificity   | 0.7600 |
+| p-value | 0.3135 |
+
+A p-value > 0.05, as in this case (0.3135), indicates that the difference in the error rates between class 0 and class 1 is not statistically significant. This means the model’s errors are balanced across the two classes, suggesting no bias in misclassification toward one class over the other. The result supports that the Random Forest model is performing fairly consistently across both classes, with no significant bias in its predictions. However, the balanced accuracy metric (75.14%) can still be improved by further refining the model.
+
+## Feature Selection and Model Training with Cross-Validation
+
+### Step 1: Extract Feature Importance
+
+In this process, we leverage feature importance analysis, feature selection, and cross-validation to build and evaluate an optimized Random Forest model.
+
+![](figures/randomforest/rf_plot_2.png)
+
+To improve the model's performance and interpretability, we identify the most important features that contribute to the prediction using importance(rf_model). This function calculates feature importance metrics for the trained Random Forest model. Features with higher values are more critical for the model's predictive power in the MeanDecreaseAccuracy while  Higher values indicate greater importance in separating the classes in MeanDecreaseGini. And by using function varImpPlot(rf_model), we can visualizes feature importance based on the above metrics, helping identify the most influential predictors. Features at the top of the plot have the greatest impact on the model.
+
+
+### Step 2: Train Random Forest with Cross-Validation Cross-Validation
+
+To avoid overfitting and validate the model effectively, cross-validation is applied using the caret package.
+
+By using 10-Fold Cross-Validation, the data is split into 10 subsets (folds), and the model is trained on 9 folds while the 10th is used for validation. This process repeats for all folds.
+
+| mtry | Accuracy | Kappa| 
+|--------|--------|--------|
+| 2 | 0.7884371 | 0.5725548 |
+| 3 | 0.8086075 | 0.6140662 |
+| 4 | 0.8187196 | 0.6346514 |
+
+Besides, the mtry parameter (number of variables considered at each split) is tuned by testing values 2, 3, and 4. And the train function identifies the optimal mtry based on cross-validation accuracy which is mtry=4 being used on the final model.
+
+
+
+Table: Confusion Matrix of Tuned Random Forest Model on Test Dataset
+
+|  | 0 | 1| 
+|--------|--------|--------|
+| 0 | 82 | 36 | 
+| 1 | 23 | 114 | 
+
+
+After training the Random Forest model with cross-validation and selecting the optimal number of variables at each split (mtry = 4), the model was evaluated on the test dataset. The model achieved an accuracy of 76.86%, with a 95% confidence interval of (71.19%, 81.90%). This indicates that approximately 77% of the predictions were correct.The model correctly identified 78.10% of instances belonging to class 0 and correctly identified 76.00% of instances belonging to class 1.
+
+
+Table: Tuned Random Forest Model Result
+
+| Metric  | Value  |
+|--------|--------|
+| Accuracy  | 0.7686 |
+| Sensitivity   | 0.7810 |
+| Specificity   | 0.7600 |
+| p-value | 0.1182 |
+
+
+In conclusion, the Random Forest model performed well on unseen data, achieving high accuracy and balanced performance across both classes. The sensitivity and specificity metrics suggest that the model effectively identifies both outcomes, with slightly better performance for class 0. Although some misclassifications remain, the results indicate that the model is robust and suitable for predicting the target variable (cid). 

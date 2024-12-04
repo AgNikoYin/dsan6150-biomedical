@@ -1,0 +1,39 @@
+project:
+  type: website
+
+website:
+  title: "DSAN 6150  Final Project"
+  sidebar:
+    background: lightblue
+    logo: "figures/logo.png"
+
+    style: "docked"
+    contents:
+      - href: presentation.qmd
+        text: Presentation
+      - href: project-proposal.qmd
+        text: Home
+      - href: EDA.qmd
+        text: EDA
+      - href: survival_analysis.qmd
+        text: Survival Analysis
+      - href: Logistic_model.qmd
+        text: Logistic Regression
+      - href: Decision_tree.qmd
+        text: Decision Tree
+      - href: random_forest.qmd
+        text: Random Forest
+      - href: conclusion.qmd
+        text: Conclusion
+      
+        
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    code-fold: true
+
+
+

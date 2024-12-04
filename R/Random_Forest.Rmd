@@ -1,0 +1,230 @@
+---
+title: "Random_Forest"
+author: "Xue Qin"
+date: "2024-10-23"
+output: html_document
+---
+```{r}
+library(tidyverse)
+library(rpart)
+
+library(rpart.plot)
+```
+
+```{r}
+
+data <- read.csv("../data/derived-data/data_scaled_950.csv")
+```
+
+
+```{r}
+library(caret)
+library(randomForest)
+
+
+
+set.seed(123)
+
+trainIndex <- createDataPartition(data$cid, p = 0.7, list = FALSE)
+
+train_data <- data[trainIndex, ]
+test_data <- data[-trainIndex, ]
+```
+
+```{r}
+train_data$cid <- as.factor(train_data$cid)
+test_data$cid <- as.factor(test_data$cid)
+
+```
+
+```{r}
+# Fit Random Forest model
+rf_model <- randomForest(cid ~ age + trt + wtkg + hemo + homo + drugs + karnof + oprior + z30 + zprior + preanti + race + gender + str2 + strat + symptom + treat + offtrt + cd40 + cd420 + cd80 + cd820, 
+                         data = train_data, ntree = 500, mtry = 3, importance = TRUE)
+
+#model summary
+print(rf_model)
+
+```
+```{r}
+plot(rf_model)
+```
+
+
+```{r}
+
+test_pred_class <- predict(rf_model, newdata = test_data)
+
+confusionMatrix(factor(test_pred_class), factor(test_data$cid))
+
+```
+
+```{r}
+
+importance(rf_model)
+
+varImpPlot(rf_model)
+
+```
+```{r}
+library(caret)
+
+# Step 1: Extract Feature Importance
+# Extract feature importance values from the original model
+importance_values <- importance(rf_model)
+
+# Sort features by MeanDecreaseAccuracy or MeanDecreaseGini
+# For this example, using MeanDecreaseAccuracy
+sorted_importance <- importance_values[order(-importance_values[, "MeanDecreaseAccuracy"]), ]
+
+# Select the top N features (e.g., top 10)
+top_features <- rownames(sorted_importance)[1:17]
+
+# Filter train and test datasets to include only selected features
+train_data_selected <- train_data[, c(top_features, "cid")]  # Include target variable
+test_data_selected <- test_data[, c(top_features, "cid")]
+
+# Step 2: Set Up Cross-Validation
+# Define cross-validation settings (5-fold cross-validation)
+control <- trainControl(method = "cv", number = 10, verboseIter = TRUE)
+
+# Step 3: Train Random Forest with Cross-Validation
+set.seed(123)  # For reproducibility
+rf_cv_model <- train(
+  cid ~ ., 
+  data = train_data_selected, 
+  method = "rf", 
+  metric = "Accuracy",  # Optimize for accuracy
+  trControl = control, 
+  tuneGrid = expand.grid(
+    mtry = c(2, 3, 4)  # Hyperparameter tuning for mtry
+  ),
+  ntree = 500  # Fixed number of trees
+)
+
+# Step 4: Model Performance
+# Print the best model and its parameters
+print(rf_cv_model)
+
+plot(rf_cv_model)
+
+
+# Step 5: Evaluate on the Test Set
+test_pred_selected <- predict(rf_cv_model, newdata = test_data_selected)
+confusionMatrix(factor(test_pred_selected), factor(test_data_selected$cid))
+```
+
+
+
+
+```{r}
+
+library(randomForest)
+
+# Define ranges for ntree and mtry
+ntree_values <- c(100, 200, 500, 1000)  # Number of trees to test
+mtry_values <- seq(2, sqrt(ncol(train_data) - 1), by = 1)  # Number of variables at each split
+
+# Initialize a data frame to store results
+results <- data.frame(ntree = integer(), mtry = integer(), OOB_Error = numeric())
+
+# Loop through all combinations of ntree and mtry
+for (ntree in ntree_values) {
+  for (mtry in mtry_values) {
+    # Train the Random Forest model
+    rf_model <- randomForest(cid ~ ., data = train_data, ntree = ntree, mtry = mtry, importance = TRUE)
+    
+    # Record the OOB error
+    oob_error <- rf_model$err.rate[nrow(rf_model$err.rate), "OOB"]
+    
+    # Store the results
+    results <- rbind(results, data.frame(ntree = ntree, mtry = mtry, OOB_Error = oob_error))
+  }
+}
+
+# Find the combination with the lowest OOB error
+best_params <- results[which.min(results$OOB_Error), ]
+
+# Print results
+print("Best Parameters:")
+print(best_params)
+
+```
+
+```{r}
+# Fit Random Forest model
+rf_model2 <- randomForest(cid ~ age + trt + wtkg + hemo + homo + drugs + karnof + oprior + z30 + zprior + preanti + race + gender + str2 + strat + symptom + treat + offtrt + cd40 + cd420 + cd80 + cd820, 
+                         data = train_data, ntree = 200, mtry = 4, importance = TRUE)
+
+#model summary
+print(rf_model2)
+
+```
+
+```{r}
+
+test_pred_class <- predict(rf_model2, newdata = test_data)
+
+confusionMatrix(factor(test_pred_class), factor(test_data$cid))
+
+```
+
+
+
+
+
+```{r}
+
+tuned_rf <- train(cid ~ age + trt + hemo + homo + karnof + oprior + z30 + preanti + race + gender + str2 + strat + symptom + cd40 + cd420 + cd80 + cd820, 
+                  data = train_data, method = "rf", tuneLength = 5, trControl = trainControl(method = "cv", number = 5))
+
+
+print(tuned_rf)
+```
+```{r}
+plot(tuned_rf)
+```
+
+
+```{r}
+test_pred_class2 <- predict(tuned_rf, newdata = test_data)
+
+# Confusion Matrix 
+confusionMatrix(factor(test_pred_class2), factor(test_data$cid))
+```
+Feature Selection: using a recursive feature elimination approach
+
+```{r}
+control <- rfeControl(functions = rfFuncs, method = "cv", number = 10)
+
+# Running the recursive feature elimination
+results <- rfe(train_data[, -which(names(train_data) == "cid")], train_data$cid,
+               sizes = c(1:ncol(train_data)-1), rfeControl = control)
+
+# Print the results to see the selected features
+print(results)
+```
+
+```{r}
+# Print the results to see the selected features
+print(results$optVariables)
+```
+
+```{r}
+# Define model using only selected features
+selected_features <- results$optVariables
+formula <- as.formula(paste("cid ~", paste(selected_features, collapse = "+")))
+
+# Train the decision tree model
+tree_model <- rpart(formula, data = train_data, method = "class")
+
+# Make predictions
+predictions <- predict(tree_model, test_data, type = "class")
+
+# Calculate accuracy
+accuracy <- sum(predictions == test_data$cid) / nrow(test_data)
+print(paste("Accuracy:", accuracy))
+
+```
+
+

@@ -1,0 +1,695 @@
+---
+title: "Kaplan-Meier"
+author: "Zhuoyan Guo"
+date: "2024-12-03"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(survival)
+library(ggplot2)
+library(survminer)
+```
+
+```{r}
+data <- read_csv("../data/raw-data/aids_clinical_trials_combined.csv", show_col_types = FALSE)
+```
+
+```{r}
+str(data)
+```
+
+```{r}
+summary(data)
+```
+
+```{r}
+surv_object <- Surv(time = data$time, event = data$cid)
+km_fit <- survfit(surv_object ~ trt, data = data)
+
+# Plot Kaplan-Meier survival curves
+ggsurvplot(km_fit, data = data, risk.table = TRUE, pval = TRUE, 
+           conf.int = TRUE, xlab = "Time to failure or censoring (days)", 
+           ylab = "Survival Probability", ggtheme = theme_minimal())
+```
+
+The p-value (p < 0.0001) indicates that there is a statistically significant difference between the survival curves of the different treatment groups. This means that the treatment has a significant effect on survival outcomes.
+trt=0 perform worst and trt=1 seems perform best compared to others.
+
+## Creating a New Kaplan-Meier Curve for trt=1, trt=2, trt=3
+```{r}
+# Subset the data to exclude treatment 0
+data_subset <- subset(data, trt %in% c(1, 2, 3))
+
+# Ensure the treatment variable is still treated as a factor with the correct levels
+data_subset$trt <- factor(data_subset$trt, levels = c(1, 2, 3))
+
+# Fit the Kaplan-Meier survival model
+fit_subset <- survfit(Surv(time, cid) ~ trt, data = data_subset)
+
+# Plot the survival curves using ggsurvplot
+plot_subset <- ggsurvplot(
+    fit_subset, 
+    data = data_subset,
+    pval = TRUE, 
+    conf.int = TRUE,
+    xlab = "Time (days)",
+    ylab = "Survival Probability",
+    ggtheme = theme_minimal(),
+    title = "Survival Curves for Treatments 1, 2, and 3"
+)
+
+# Print the plot
+print(plot_subset)
+
+```
+By creating a new Kaplan-Meier survival curve that includes only treatments 1, 2, and 3, with the p-value = 0.4, we cannot conclude that there are significant differences in survival rates among the different treatment groups trt=1, trt=2, trt=3.
+
+## Stratified Kaplan-Meier Curves -- Treatment and Gender
+
+```{r}
+# Step 1: Required libraries
+library(survival)
+library(survminer)
+library(gridExtra)
+library(dplyr)
+
+# Step 2: Bootstrap function
+perform_bootstrap <- function(data, n_bootstrap = 100) {
+  # Create list to store bootstrap samples
+  boot_samples <- list()
+  
+  for(i in 1:n_bootstrap) {
+    # Sample with replacement, stratified by treatment
+    boot_sample <- data %>%
+      group_by(trt) %>%
+      slice_sample(prop = 1, replace = TRUE) %>%
+      ungroup()
+    
+    boot_samples[[i]] <- boot_sample
+  }
+  
+  return(boot_samples)
+}
+
+# Step 3: Function to create survival plots for one bootstrap sample
+create_survival_plots <- function(boot_data) {
+  plots <- list()
+  
+  for(t in levels(boot_data$trt)) {
+    trt_data <- boot_data[boot_data$trt == t,]
+    if(nrow(trt_data) > 0) {
+      fit <- survfit(Surv(time, cid) ~ gender, data = trt_data)
+      plot <- ggsurvplot(
+        fit, 
+        data = trt_data,
+        pval = TRUE, 
+        conf.int = TRUE,
+        xlab = "Time (days)", 
+        ylab = "Survival Probability",
+        ggtheme = theme_minimal(),
+        title = sprintf("Survival Curves for Treatment %s", t)
+      )
+      plots[[as.character(t)]] <- plot$plot
+    }
+  }
+  
+  return(plots)
+}
+
+# Step 4: Perform bootstrap
+set.seed(123) # for reproducibility
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+data$race <- as.factor(data$race)
+boot_samples <- perform_bootstrap(data, n_bootstrap = 100)
+
+# Step 5: Create plots for each bootstrap sample
+# Let's look at the first bootstrap sample as an example
+boot_plots <- create_survival_plots(boot_samples[[1]])
+
+# Display the plots for the first bootstrap sample
+do.call(grid.arrange, c(boot_plots, ncol = 2, nrow = 2))
+
+```
+
+## Stratified Kaplan-Meier Curves -- Treatment and Race
+
+```{r}
+# Step 1: Required libraries
+library(survival)
+library(survminer)
+library(gridExtra)
+library(dplyr)
+
+# Step 2: Bootstrap function
+perform_bootstrap <- function(data, n_bootstrap = 100) {
+  # Create list to store bootstrap samples
+  boot_samples <- list()
+  
+  for(i in 1:n_bootstrap) {
+    # Sample with replacement, stratified by treatment
+    boot_sample <- data %>%
+      group_by(trt) %>%
+      slice_sample(prop = 1, replace = TRUE) %>%
+      ungroup()
+    
+    boot_samples[[i]] <- boot_sample
+  }
+  
+  return(boot_samples)
+}
+
+# Step 3: Function to create survival plots for one bootstrap sample
+create_survival_plots <- function(boot_data) {
+  plots <- list()
+  
+  for(t in levels(boot_data$trt)) {
+    trt_data <- boot_data[boot_data$trt == t,]
+    if(nrow(trt_data) > 0) {
+      fit <- survfit(Surv(time, cid) ~ race, data = trt_data)
+      plot <- ggsurvplot(
+        fit, 
+        data = trt_data,
+        pval = TRUE, 
+        conf.int = TRUE,
+        xlab = "Time (days)", 
+        ylab = "Survival Probability",
+        ggtheme = theme_minimal(),
+        title = sprintf("Survival Curves for Treatment %s", t)
+      )
+      plots[[as.character(t)]] <- plot$plot
+    }
+  }
+  
+  return(plots)
+}
+
+# Step 4: Perform bootstrap
+set.seed(123) # for reproducibility
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+data$race <- as.factor(data$race)
+boot_samples <- perform_bootstrap(data, n_bootstrap = 100)
+
+# Step 5: Create plots for each bootstrap sample
+# Let's look at the first bootstrap sample as an example
+boot_plots <- create_survival_plots(boot_samples[[1]])
+
+# Display the plots for the first bootstrap sample
+do.call(grid.arrange, c(boot_plots, ncol = 2, nrow = 2))
+
+
+```
+
+## Stratified Kaplan-Meier Curves -- Treatment and ARV History
+
+Stratifying by ARV history allows us to explore how prior exposure to antiretroviral therapy impacts survival outcomes.
+
+
+```{r}
+# Step 1: Required libraries
+library(survival)
+library(survminer)
+library(gridExtra)
+library(dplyr)
+
+# Step 2: Bootstrap function
+perform_bootstrap <- function(data, n_bootstrap = 100) {
+  # Create list to store bootstrap samples
+  boot_samples <- list()
+  
+  for(i in 1:n_bootstrap) {
+    # Sample with replacement, stratified by treatment
+    boot_sample <- data %>%
+      group_by(trt) %>%
+      slice_sample(prop = 1, replace = TRUE) %>%
+      ungroup()
+    
+    boot_samples[[i]] <- boot_sample
+  }
+  
+  return(boot_samples)
+}
+
+# Step 3: Function to create survival plots for one bootstrap sample
+create_survival_plots <- function(boot_data) {
+  plots <- list()
+  
+  for(t in levels(boot_data$trt)) {
+    trt_data <- boot_data[boot_data$trt == t,]
+    if(nrow(trt_data) > 0) {
+      fit <- survfit(Surv(time, cid) ~ str2, data = trt_data)
+      plot <- ggsurvplot(
+        fit, 
+        data = trt_data,
+        pval = TRUE, 
+        conf.int = TRUE,
+        xlab = "Time (days)", 
+        ylab = "Survival Probability",
+        ggtheme = theme_minimal(),
+        title = sprintf("Survival Curves for Treatment %s", t)
+      )
+      plots[[as.character(t)]] <- plot$plot
+    }
+  }
+  
+  return(plots)
+}
+
+# Step 4: Perform bootstrap
+set.seed(123) # for reproducibility
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+data$race <- as.factor(data$race)
+boot_samples <- perform_bootstrap(data, n_bootstrap = 100)
+
+# Step 5: Create plots for each bootstrap sample
+# Let's look at the first bootstrap sample as an example
+boot_plots <- create_survival_plots(boot_samples[[1]])
+
+# Display the plots for the first bootstrap sample
+do.call(grid.arrange, c(boot_plots, ncol = 2, nrow = 2))
+
+
+```
+
+Patients with prior ARV treatment might have developed drug resistance, reducing the effectiveness of subsequent treatments. However, using Treatment 1, antiretroviral history (naive vs. experienced) does not significantly impact survival outcomes for patients receiving Treatment 1. This means that previous exposure to antiretroviral therapy (ARV) does not appear to reduce the effectiveness of Treatment 1 in a statistically significant way.
+
+
+## Stratified Kaplan-Meier Curves -- Treatment and Symptom
+
+Stratifying by ARV history allows us to explore how prior exposure to antiretroviral therapy impacts survival outcomes.
+
+
+```{r}
+# Step 1: Required libraries
+library(survival)
+library(survminer)
+library(gridExtra)
+library(dplyr)
+
+# Step 2: Bootstrap function
+perform_bootstrap <- function(data, n_bootstrap = 100) {
+  # Create list to store bootstrap samples
+  boot_samples <- list()
+  
+  for(i in 1:n_bootstrap) {
+    # Sample with replacement, stratified by treatment
+    boot_sample <- data %>%
+      group_by(trt) %>%
+      slice_sample(prop = 1, replace = TRUE) %>%
+      ungroup()
+    
+    boot_samples[[i]] <- boot_sample
+  }
+  
+  return(boot_samples)
+}
+
+# Step 3: Function to create survival plots for one bootstrap sample
+create_survival_plots <- function(boot_data) {
+  plots <- list()
+  
+  for(t in levels(boot_data$trt)) {
+    trt_data <- boot_data[boot_data$trt == t,]
+    if(nrow(trt_data) > 0) {
+      fit <- survfit(Surv(time, cid) ~ symptom, data = trt_data)
+      plot <- ggsurvplot(
+        fit, 
+        data = trt_data,
+        pval = TRUE, 
+        conf.int = TRUE,
+        xlab = "Time (days)", 
+        ylab = "Survival Probability",
+        ggtheme = theme_minimal(),
+        title = sprintf("Survival Curves for Treatment %s", t)
+      )
+      plots[[as.character(t)]] <- plot$plot
+    }
+  }
+  
+  return(plots)
+}
+
+# Step 4: Perform bootstrap
+set.seed(123) # for reproducibility
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+data$race <- as.factor(data$race)
+boot_samples <- perform_bootstrap(data, n_bootstrap = 100)
+
+# Step 5: Create plots for each bootstrap sample
+# Let's look at the first bootstrap sample as an example
+boot_plots <- create_survival_plots(boot_samples[[1]])
+
+# Display the plots for the first bootstrap sample
+do.call(grid.arrange, c(boot_plots, ncol = 2, nrow = 2))
+
+
+```
+For Treatment 0 and 3, the p-values (0.11 and 0.38, respectively) indicate no statistically significant difference in survival probabilities between symptomatic and asymptomatic patients, suggesting that symptom status has no meaningful effect on survival in these treatment groups. However, for Treatment 1, the p-value (0.0039) shows a significant difference, where asymptomatic patients (symptom=0) exhibit slightly better survival probabilities compared to symptomatic patients (symptom=1). The most striking difference is observed in Treatment 2, where the p-value (<0.0001) and the clear divergence of the survival curves indicate a strong association between symptom status and survival, with asymptomatic patients (symptom=0) having markedly better survival outcomes.
+
+## Stratified Kaplan-Meier Curves -- Treatment and Homosexuality
+
+Stratifying by ARV history allows us to explore how prior exposure to antiretroviral therapy impacts survival outcomes.
+
+
+```{r}
+# Step 1: Required libraries
+library(survival)
+library(survminer)
+library(gridExtra)
+library(dplyr)
+
+# Step 2: Bootstrap function
+perform_bootstrap <- function(data, n_bootstrap = 100) {
+  # Create list to store bootstrap samples
+  boot_samples <- list()
+  
+  for(i in 1:n_bootstrap) {
+    # Sample with replacement, stratified by treatment
+    boot_sample <- data %>%
+      group_by(trt) %>%
+      slice_sample(prop = 1, replace = TRUE) %>%
+      ungroup()
+    
+    boot_samples[[i]] <- boot_sample
+  }
+  
+  return(boot_samples)
+}
+
+# Step 3: Function to create survival plots for one bootstrap sample
+create_survival_plots <- function(boot_data) {
+  plots <- list()
+  
+  for(t in levels(boot_data$trt)) {
+    trt_data <- boot_data[boot_data$trt == t,]
+    if(nrow(trt_data) > 0) {
+      fit <- survfit(Surv(time, cid) ~ homo, data = trt_data)
+      plot <- ggsurvplot(
+        fit, 
+        data = trt_data,
+        pval = TRUE, 
+        conf.int = TRUE,
+        xlab = "Time (days)", 
+        ylab = "Survival Probability",
+        ggtheme = theme_minimal(),
+        title = sprintf("Survival Curves for Treatment %s", t)
+      )
+      plots[[as.character(t)]] <- plot$plot
+    }
+  }
+  
+  return(plots)
+}
+
+# Step 4: Perform bootstrap
+set.seed(123) # for reproducibility
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+data$race <- as.factor(data$race)
+boot_samples <- perform_bootstrap(data, n_bootstrap = 100)
+
+# Step 5: Create plots for each bootstrap sample
+# Let's look at the first bootstrap sample as an example
+boot_plots <- create_survival_plots(boot_samples[[1]])
+
+# Display the plots for the first bootstrap sample
+do.call(grid.arrange, c(boot_plots, ncol = 2, nrow = 2))
+
+
+```
+
+## Survival Probability vs. Karnofsky score
+
+```{r}
+# Create Karnofsky quartiles
+data <- data %>%
+  mutate(Karnofsky_quartile = ntile(karnof, 4))  # Assuming Karnofsky score column is 'karnof'
+
+# Convert treatment to a factor if not already
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+
+# Create a list to store the plots
+plots <- list()
+
+# Loop through each treatment and create separate Kaplan-Meier curves
+for (t in levels(data$trt)) {
+  # Subset data for the current treatment
+  trt_data <- subset(data, trt == t)
+  
+  # Fit Kaplan-Meier survival curves for Karnofsky quartiles
+  fit <- survfit(Surv(time, cid) ~ Karnofsky_quartile, data = trt_data)
+  
+  # Generate Kaplan-Meier plot
+  plot <- ggsurvplot(
+    fit,
+    data = trt_data,
+    pval = TRUE,
+    conf.int = FALSE,  # Disable confidence intervals if they clutter the plot
+    xlab = "Time (days)",
+    ylab = "Survival Probability",
+    legend.title = "Karnofsky Quartiles",  # Descriptive legend title
+    legend.labs = c("Q1 (Lowest)", "Q2", "Q3", "Q4"),  # Adjust labels
+    ggtheme = theme_minimal(base_size = 8),  # Larger base font size
+    title = sprintf("Survival by Karnofsky Quartile (Treatment %s)", t),
+    legend = "bottom"  # Position legend at the bottom
+  )
+  
+  # Adjust plot margins for readability
+  plot$plot <- plot$plot + theme(plot.margin = margin(10, 10, 10, 10))
+  
+  # Store the plot in the list
+  plots[[t]] <- plot$plot
+}
+
+# Arrange the plots in a grid with better spacing
+library(gridExtra)
+do.call(grid.arrange, c(plots, ncol = 2, nrow = 2))
+```
+
+## Survival Probability vs. Age
+
+```{r}
+# Create Karnofsky quartiles
+data <- data %>%
+  mutate(age_quartile = ntile(age, 4)) 
+
+# Convert treatment to a factor if not already
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+
+# Create a list to store the plots
+plots <- list()
+
+# Loop through each treatment and create separate Kaplan-Meier curves
+for (t in levels(data$trt)) {
+  # Subset data for the current treatment
+  trt_data <- subset(data, trt == t)
+  
+  # Fit Kaplan-Meier survival curves for age quartiles
+  fit <- survfit(Surv(time, cid) ~ age_quartile, data = trt_data)
+  
+  # Generate Kaplan-Meier plot
+  plot <- ggsurvplot(
+    fit,
+    data = trt_data,
+    pval = TRUE,
+    conf.int = FALSE,  # Disable confidence intervals if they clutter the plot
+    xlab = "Time (days)",
+    ylab = "Survival Probability",
+    legend.title = "Age Quartiles",  # Descriptive legend title
+    legend.labs = c("Q1 (Lowest)", "Q2", "Q3", "Q4"),  # Adjust labels
+    ggtheme = theme_minimal(base_size = 8),  # Larger base font size
+    title = sprintf("Survival by Age Quartile (Treatment %s)", t),
+    legend = "bottom"  # Position legend at the bottom
+  )
+  
+  # Adjust plot margins for readability
+  plot$plot <- plot$plot + theme(plot.margin = margin(10, 10, 10, 10))
+  
+  # Store the plot in the list
+  plots[[t]] <- plot$plot
+}
+
+# Arrange the plots in a grid with better spacing
+library(gridExtra)
+do.call(grid.arrange, c(plots, ncol = 2, nrow = 2))
+```
+
+
+## Survival Probability vs. CD4 at baseline
+
+```{r}
+# Create Karnofsky quartiles
+data <- data %>%
+  mutate(cd4_quartile = ntile(cd40, 4)) 
+
+# Convert treatment to a factor if not already
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+
+# Create a list to store the plots
+plots <- list()
+
+# Loop through each treatment and create separate Kaplan-Meier curves
+for (t in levels(data$trt)) {
+  # Subset data for the current treatment
+  trt_data <- subset(data, trt == t)
+  
+  # Fit Kaplan-Meier survival curves for age quartiles
+  fit <- survfit(Surv(time, cid) ~ cd4_quartile, data = trt_data)
+  
+  # Generate Kaplan-Meier plot
+  plot <- ggsurvplot(
+    fit,
+    data = trt_data,
+    pval = TRUE,
+    conf.int = FALSE,  # Disable confidence intervals if they clutter the plot
+    xlab = "Time (days)",
+    ylab = "Survival Probability",
+    legend.title = "CD4 Quartiles",  # Descriptive legend title
+    legend.labs = c("Q1 (Lowest)", "Q2", "Q3", "Q4"),  # Adjust labels
+    ggtheme = theme_minimal(base_size = 8),  # Larger base font size
+    title = sprintf("Survival by CD4 Quartile (Treatment %s)", t),
+    legend = "bottom"  # Position legend at the bottom
+  )
+  
+  # Adjust plot margins for readability
+  plot$plot <- plot$plot + theme(plot.margin = margin(10, 10, 10, 10))
+  
+  # Store the plot in the list
+  plots[[t]] <- plot$plot
+}
+
+# Arrange the plots in a grid with better spacing
+library(gridExtra)
+do.call(grid.arrange, c(plots, ncol = 2, nrow = 2))
+```
+## Survival Probability vs. CD8 at baseline
+
+```{r}
+# Create Karnofsky quartiles
+data <- data %>%
+  mutate(cd8_quartile = ntile(cd80, 4)) 
+
+# Convert treatment to a factor if not already
+data$trt <- factor(data$trt, levels = c(0, 1, 2, 3))
+
+# Create a list to store the plots
+plots <- list()
+
+# Loop through each treatment and create separate Kaplan-Meier curves
+for (t in levels(data$trt)) {
+  # Subset data for the current treatment
+  trt_data <- subset(data, trt == t)
+  
+  # Fit Kaplan-Meier survival curves for age quartiles
+  fit <- survfit(Surv(time, cid) ~ cd8_quartile, data = trt_data)
+  
+  # Generate Kaplan-Meier plot
+  plot <- ggsurvplot(
+    fit,
+    data = trt_data,
+    pval = TRUE,
+    conf.int = FALSE,  # Disable confidence intervals if they clutter the plot
+    xlab = "Time (days)",
+    ylab = "Survival Probability",
+    legend.title = "CD8 Quartiles",  # Descriptive legend title
+    legend.labs = c("Q1 (Lowest)", "Q2", "Q3", "Q4"),  # Adjust labels
+    ggtheme = theme_minimal(base_size = 8),  # Larger base font size
+    title = sprintf("Survival by CD8 Quartile (Treatment %s)", t),
+    legend = "bottom"  # Position legend at the bottom
+  )
+  
+  # Adjust plot margins for readability
+  plot$plot <- plot$plot + theme(plot.margin = margin(10, 10, 10, 10))
+  
+  # Store the plot in the list
+  plots[[t]] <- plot$plot
+}
+
+# Arrange the plots in a grid with better spacing
+library(gridExtra)
+do.call(grid.arrange, c(plots, ncol = 2, nrow = 2))
+```
+
+
+## Hazard
+
+```{r}
+data$trt <- as.factor(data$trt)     
+data$str2 <- as.factor(data$str2)  
+data$symptom <- as.factor(data$symptom)
+
+# Build the Cox proportional hazards model
+cox_model <- coxph(Surv(time, cid) ~ trt + karnof + str2 + symptom + cd40 +
+                   trt:karnof + trt:str2 + trt:symptom + trt: cd40, data = data)
+
+# Print the model summary to view hazard ratios and p-values
+summary(cox_model)
+
+# Create survival curves adjusted for treatment
+adjusted_fit <- survfit(cox_model, newdata = data.frame(
+  trt = levels(data$trt),  # Use all levels of the treatment factor
+  karnof = mean(data$karnof, na.rm = TRUE),  # Mean age as an example
+  cd40 = mean(data$cd40, na.rm = TRUE),
+  str2 = levels(data$str2)[1],  # Reference gender level
+  symptom = levels(data$symptom)[1]  # Reference health status level
+))
+
+# Visualize the adjusted survival curves
+ggsurvplot(adjusted_fit, 
+           data = data, 
+           legend.title = "Treatment Groups", 
+           legend.labs = levels(data$trt),  # Ensure this matches levels of 'trt'
+           xlab = "Time (days)",
+           ylab = "Survival Probability",
+           title = "Adjusted Survival Curves by Treatment")
+```
+```{r}
+cox.zph(cox_model)
+```
+
+
+
+
+```{r}
+# Categorize cd40 into meaningful groups (e.g., quartiles)
+data$cd40_group <- cut(data$cd40,
+                       breaks = quantile(data$cd40, probs = seq(0, 1, by = 0.25), na.rm = TRUE),
+                       include.lowest = TRUE,
+                       labels = c("Low", "Lower-Mid", "Upper-Mid", "High"))
+
+# Check the distribution of the new groups
+table(data$cd40_group)
+
+# Fit a Cox model stratified by the grouped cd40 variable
+cox_model_strat_grouped <- coxph(Surv(time, cid) ~ trt + age + gender + karnof + str2 + symptom + 
+                                 strata(cd40_group), data = data)
+
+# Print the summary of the stratified model
+summary(cox_model_strat_grouped)
+
+# Generate survival curves for the grouped cd40 strata
+adjusted_fit_grouped <- survfit(cox_model_strat_grouped)
+
+# Visualize the survival curves
+ggsurvplot(adjusted_fit_grouped,
+           data = data,
+           legend.title = "cd40 Categories",
+           xlab = "Time (days)",
+           ylab = "Survival Probability",
+           title = "Survival Curves Stratified by cd40 Categories")
+```
+The survival curves stratified by CD40 categories (Low, Lower-Mid, Upper-Mid, High) show a clear trend where higher baseline CD40 levels are associated with better survival probabilities over time. Patients in the "Low" CD40 category exhibit the steepest decline in survival probability, indicating a higher risk of mortality compared to the other categories. Conversely, patients in the "High" CD40 category maintain the highest survival probability, reflecting a protective effect of higher baseline immune function. 
+
+Unlike Kaplan-Meier (KM) curves, which provide unadjusted survival probabilities based solely on CD40 categories, this stratified Cox proportional hazards model accounts for other covariates (e.g., treatment, age, symptoms, and Karnofsky score). This adjustment isolates the effects of these covariates while accounting for differences in baseline CD40 levels, offering a more nuanced understanding of survival outcomes. The stratified approach ensures that the strong influence of CD40 is appropriately addressed without confounding the effects of other variables, making it a more robust and informative analysis compared to using KM curves alone.
+
+```{r}
+cox.zph(cox_model_strat_grouped)
+```
+
+stratifying cd40 into grouped categories effectively addressed the proportional hazards (PH) assumption violations for the variable. 
+
+
+
+
+

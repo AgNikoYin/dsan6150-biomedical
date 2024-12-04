@@ -1,0 +1,14 @@
+^fall-2024-project\.Rproj$
+^\.Rproj\.user$
+^\.DS_Store$
+^LICENSE\.md$
+^data/raw-data$
+^data/derived-data$
+^outputs$
+^figures$
+^analyses$
+^make\.R$
+^CONTRIBUTING\.md$
+^\.github$
+^README\.Rmd$
+^README\.html$

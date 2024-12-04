@@ -1,0 +1,228 @@
+---
+title: "Models"
+author: "Xue Qin"
+date: "2024-10-23"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(pROC)
+```
+
+```{r}
+data <- read_csv("../data/raw-data/aids_clinical_trials_combined.csv")
+```
+# Logistic Regression
+```{r}
+binary_cols <- c("hemo", "homo", "drugs", "karnof", "oprior", "z30", "zprior", 
+                "preanti", "race", "gender", "str2", "strat", "symptom", 
+                "treat", "offtrt")
+
+# Survival variables (don't scale these)
+survival_cols <- c("time", "cid")
+
+# Get all column names
+all_cols <- names(data)
+
+# Identify continuous columns to scale
+# (those not in binary_cols and not in survival_cols)
+continuous_cols <- setdiff(all_cols, c(binary_cols, survival_cols))
+
+# Create new dataframe
+data_scaled <- data
+
+# Scale only continuous variables
+data_scaled[continuous_cols] <- scale(data[continuous_cols])
+
+# Binary and survival variables remain unchanged
+data_scaled[binary_cols] <- data[binary_cols]
+data_scaled[survival_cols] <- data[survival_cols]
+data_scaled_950<- data_scaled%>%
+  filter(time<=950)
+
+write.csv(data_scaled_950,"../data/derived-data/data_scaled_950.csv",row.names = FALSE)
+
+library(caret)
+
+set.seed(123)
+
+trainIndex <- createDataPartition(data_scaled_950$cid, p = 0.7, list = FALSE)
+
+train_data <- data_scaled_950[trainIndex, ]
+test_data <- data_scaled_950[-trainIndex, ]
+train_data$cid <- as.factor(train_data$cid)
+test_data$cid <- as.factor(test_data$cid)
+```
+
+```{r}
+logistic_model <- glm(cid ~ age + trt + wtkg + hemo + homo + drugs + karnof+oprior+z30+zprior+preanti+race+gender+str2+strat+symptom+treat+offtrt+cd40+cd420+cd80+cd820, 
+                   data = train_data, family = binomial)
+model_summary<- summary(logistic_model)
+```
+
+```{r}
+test_predictions <- predict(logistic_model, newdata = test_data, type = "response")
+
+test_pred_class <- ifelse(test_predictions > 0.5, 1, 0)
+
+confusionMatrix(factor(test_pred_class), factor(test_data$cid))
+
+```
+
+```{r}
+# Roc Curve
+
+roc_curve <- roc(test_data$cid, test_predictions)
+plot(roc_curve, col = "blue", main = "ROC Curve for Logistic Regression")
+
+auc(roc_curve)
+
+```
+
+```{r}
+p_values <- model_summary$coefficients[, 4] 
+
+significant_vars <- names(p_values[p_values < 0.05])
+
+print(significant_vars)
+```
+
+## fit with selected features with P<0.05
+```{r}
+logistic_model2 <- glm(cid ~ karnof+preanti+symptom+treat+cd40+cd420+cd820, 
+                   data = train_data, family = binomial)
+
+# Summary of the model
+model_summary2<- summary(logistic_model2)
+```
+
+```{r}
+
+test_predictions2 <- predict(logistic_model2, newdata = test_data, type = "response")
+
+test_pred_class2 <- ifelse(test_predictions2 > 0.5, 1, 0)
+
+confusionMatrix(factor(test_pred_class2), factor(test_data$cid))
+```
+
+# Lasso
+```{r}
+library(glmnet)
+
+
+X <- model.matrix(cid ~ age + trt + wtkg + hemo + homo + drugs + karnof + oprior + z30 + zprior + preanti + race + gender + str2 + strat + symptom + treat + offtrt + cd40 + cd420 + cd80 + cd820, data = data_scaled_950)[, -1]
+y <- data_scaled_950$cid
+
+lasso_model <- glmnet(X, y, family = "binomial", alpha = 1)
+
+
+cv_lasso <- cv.glmnet(X, y, family = "binomial", alpha = 1)
+
+
+best_lambda <- cv_lasso$lambda.min
+
+coef(cv_lasso, s = "lambda.min")
+
+```
+
+## fit model with selected feature
+```{r}
+
+X_train <- model.matrix(cid ~ offtrt + cd420 + race + hemo + symptom + drugs + gender + cd820 + age + strat, data = train_data)[, -1]
+X_test <- model.matrix(cid ~ offtrt + cd420 + race + hemo + symptom + drugs + gender + cd820 + age + strat, data = test_data)[, -1]
+
+
+y_train <- train_data$cid
+y_test <- test_data$cid
+cv_lasso <- cv.glmnet(X_train, y_train, family = "binomial", alpha = 1)
+
+best_lambda <- cv_lasso$lambda.min
+
+lasso_model <- glmnet(X_train, y_train, family = "binomial", alpha = 1, lambda = best_lambda)
+
+test_predictions_lasso <- predict(lasso_model, newx = X_test, type = "response")
+
+roc_curve_lasso <- roc(test_data$cid, test_predictions_lasso)
+plot(roc_curve_lasso, main = "ROC Curve for Lasso Selection Model", col="violetred2")
+auc(roc_curve_lasso)
+
+test_pred_class_lasso <- ifelse(test_predictions_lasso > 0.5, 1, 0)
+# Confusion Matrix
+confusionMatrix(factor(test_pred_class_lasso), factor(y_test))
+
+print(coef(lasso_model))
+
+```
+
+
+### Backward Selection
+
+```{r}
+# Perform backward selection
+backward_model <- step(logistic_model, direction = "backward", trace = FALSE)
+
+backward_model_summary <- summary(backward_model)
+
+test_predictions_backward <- predict(backward_model, newdata = test_data, type = "response")
+test_pred_class_backward <- ifelse(test_predictions_backward > 0.5, 1, 0)
+
+conf_matrix <- confusionMatrix(factor(test_pred_class_backward), factor(test_data$cid))
+print("Confusion Matrix and Performance Metrics for Backward Selection Model:")
+print(conf_matrix)
+
+# Get the selected features
+selected_features <- names(coef(backward_model))
+print("Features Selected by Backward Selection:")
+print(selected_features)
+
+# Plot ROC curve for backward selection model
+roc_curve_backward <- roc(test_data$cid, test_predictions_backward)
+plot(roc_curve_backward, main = "ROC Curve for Backward Selection Model", col="orange")
+auc(roc_curve_backward)
+
+# Print coefficients of the final model
+print("Coefficients of the Final Model:")
+print(coef(backward_model))
+```
+
+```{r}
+plot(roc_curve_backward, col = "orange", main = "Comparison of ROC Curves",
+     xlab = "False Positive Rate (1 - Specificity)", 
+     ylab = "True Positive Rate (Sensitivity)")
+
+lines(roc_curve_lasso,col="violetred2")
+# Add the second ROC curve
+lines(roc_curve, col = "lightblue")
+
+# Add diagonal reference line
+abline(a = 0, b = 1, lty = 2, col = "gray")
+
+# Add legend
+legend("bottomright", 
+       legend = c(paste("Backward Selection (AUC =", round(auc(roc_curve_backward), 4), ")"),
+                 paste("Lasso Model (AUC =", round(auc(roc_curve_lasso), 4), ")"),
+                 paste("Full Model (AUC =", round(auc(roc_curve), 4), ")")),
+       col = c("orange", "violetred2","lightblue"), 
+       lwd = 2)
+```
+
+```{r}
+selected_features <- c("offtrt", "cd420", "race", "hemo", "symptom", "drugs", "gender", "cd820", "age", "strat")
+formula <- as.formula(paste("cid ~", paste(selected_features, collapse = " + ")))
+
+logistic_model <- glm(formula, data = train_data, family = binomial)
+summary(logistic_model)
+```
+

@@ -1,0 +1,206 @@
+---
+title: "EDA"
+subtitle: "Group #6"
+format:
+  html:
+    embed-resources: true
+    code-fold: true
+    warning: false
+---
+# Exploratory Data Analysis
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(corrplot)
+library(GGally)
+data <- read.csv("data/raw-data/aids_clinical_trials_combined.csv")
+```
+
+
+### Statistic Summary
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+# Statistic Summary of the dataset
+summary(data[, c("time", "age", "wtkg")])
+```
+
+From the statistic summary table, the average survival time is around 879.1 and the longest survival time is 1231 and the least survival time is 14. The age of patients range from 12 to 70 years old and the average age is 35.25. The average weight is range from 31 kg to 159.94 kg and the average weight is 75.13kg, and which more indicate that the patients are more linkely to be male.
+
+### Missing Value Check
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+missing_values <- colSums(is.na(data))
+print(missing_values)
+```
+There's no missing value for very column, so no data cleaning requirement needed.
+
+### Correlation Heatmap
+```{r}
+ggcorr(data)+
+  ggtitle("Correlation Matrix") +
+  theme(plot.title = element_text(hjust = 0.5, size = 16))
+```
+
+The correlation heatmap show the relationship between different features. The warmer color shows the positive correlated relationship and the coolor color shows the negative correlated relationship. We can see the variable cd820 (CD8 at 20+/-5 weeks) and cd80 (CD8 at baseline) are highly correlated, same does, cd420(CD4 at 20+/-5 weeks) and cd40(CD4 at baseline).
+
+
+### Time Distribution by Censoring Indicator
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+ggplot(data, aes(x = time, fill = as.factor(cid))) +
+  geom_histogram(position = "identity", bins = 30, color = "black", alpha = 0.5) +
+  labs(
+    title = "Time Distribution by Censoring Indicator",
+    x = "Survival Time",
+    y = "Count",
+    fill = "CID Indicator"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange"), labels = c("Censored (0)", "Failure (1)")) +
+  theme_minimal()
+
+```
+
+The histogram showcases the recorded survival time for the poeple who died are from 0 to 800 days.
+
+
+### Distribution of Treatment Groups
+```{r}
+# Distribution of Treatment Groups
+ggplot(data, aes(x = factor(trt), fill = factor(trt))) +
+  geom_bar(fill = "orange", color = "black") +
+  labs(title = "Treatment Group Distribution", x = "Treatment Group", y = "Number") +
+  scale_x_discrete(labels = c("0" = "ZDV only", "1" = "ZDV + ddI","2" = "ZZDV + Zal", "3" = "ddI only"))
+```
+
+From this graph, we can see the each treatment group are almost equally distributed, which is a well balanced dataset that would not cause any bias about the final treatment results
+
+
+### Age distribution by treatment group
+```{r}
+ggplot(data, aes(x = age, fill = as.factor(trt))) +
+  geom_histogram(bins = 30, position = "dodge", alpha = 0.7) +
+  labs(title = "Age Distribution by Treatment Group", x = "Age", fill = "Treatment Group") +
+  theme_minimal()
+```
+
+From this graph, we can see the age are centered in the range 20-30 years old and every treatment are balance distributed with patients' age.
+
+### Gender proportion by treatment group
+```{r}
+ggplot(data, aes(x = as.factor(gender), fill = as.factor(trt))) +
+  geom_bar(position = "dodge", alpha = 0.7) +
+  scale_x_discrete(labels = c("0" = "Female", "1" = "Male")) +  # Adding labels for gender
+  labs(title = "Gender Proportion by Treatment Group", x = "Gender", fill = "Treatment Group") +
+  theme_minimal()
+```
+
+From this graph, in each treatment group, the number of male is much greater than the nuber of female, this also proves that male group are more likely to have Aids than female.
+
+
+### Relationship between CD4 and CD8 counts
+```{r}
+library(ggplot2)
+library(gridExtra)
+
+# Plot for Treatment Group 1
+plot1 <- ggplot(data %>% filter(trt == 0), aes(x = cd40, y = cd80)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  labs(title = "Treatment Group 1: CD4 vs CD8", x = "CD4 Count at Baseline", y = "CD8 Count at Baseline") +
+  theme_minimal()
+
+# Plot for Treatment Group 2
+plot2 <- ggplot(data %>% filter(trt == 1), aes(x = cd40, y = cd80)) +
+  geom_point(alpha = 0.5, color = "green") +
+  labs(title = "Treatment Group 2: CD4 vs CD8", x = "CD4 Count at Baseline", y = "CD8 Count at Baseline") +
+  theme_minimal()
+
+# Plot for Treatment Group 3
+plot3 <- ggplot(data %>% filter(trt == 2), aes(x = cd40, y = cd80)) +
+  geom_point(alpha = 0.5, color = "purple") +
+  labs(title = "Treatment Group 3: CD4 vs CD8", x = "CD4 Count at Baseline", y = "CD8 Count at Baseline") +
+  theme_minimal()
+
+# Plot for Treatment Group 4 (if applicable)
+plot4 <- ggplot(data %>% filter(trt == 3), aes(x = cd40, y = cd80)) +
+  geom_point(alpha = 0.5, color = "red") +
+  labs(title = "Treatment Group 4: CD4 vs CD8", x = "CD4 Count at Baseline", y = "CD8 Count at Baseline") +
+  theme_minimal()
+
+grid.arrange(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2)
+```
+
+From this graph, there is no big difference between CD4 and CD8 in each treatment group and there is no clear trend that shows the relationship between CD4 and CD8.
+
+### Relationship between CD4 and CD8 counts at 20+/-5 weeks
+```{r}
+# Relationship between CD420 and CD820 counts
+ggplot(data, aes(x = cd420, y = cd820)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "CD4 vs CD8 Counts at 20+/-5 weeks", x = "CD4 Count at 20+/-5 weeks", y = "CD8 Count at 20+/-5 weeks") +
+  theme_minimal()
+```
+
+CD4 counts are concentrated between 0 and 900, with most points below 300. CD8 counts range from 0 to about 6000, with a dense cluster below 2000. The points are more dispersed along the CD8 axis compared to the CD4 axis. There are no straightforward signal to show that they are correlated and this might indicate that CD4 and CD8 counts are regulated independently at this stage (20 ± 5 weeks)
+
+
+### pie chart for Diagnosis Outcome distribution
+```{r}
+cid_counts <- data %>%
+  group_by(cid) %>%
+  summarise(count = n())
+
+ggplot(cid_counts, aes(x = "", y = count, fill = factor(cid))) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  labs(title = "Diagnosis Result Distribution", fill = "cid") +
+  theme_void() +
+  scale_fill_manual(labels = c("0" = "failure", "1" = "censoring"), values = c("0" = "lightblue", "1" = "orange"))
+```
+
+From the graph we can see the number of censoring is larger than the failure, which showed unbalanced outcome variable numbers, so this may take into consideration with future model training.
+
+
+### Average survival time by each treatment method
+```{r}
+avg_time_by_trt <- data %>%
+  group_by(trt) %>%
+  summarise(avg_time = mean(time, na.rm = TRUE))
+
+# bar plot for average time by treatment group
+ggplot(avg_time_by_trt, aes(x = factor(trt), y = avg_time, fill = factor(trt))) +
+  geom_bar(stat = "identity", color = "black") +
+  labs(title = "Average Time by Treatment Group", x = "Treatment Group", y = "Average Time") +
+  theme_minimal() +
+  scale_fill_discrete(name = "Treatment") +
+  scale_x_discrete(labels = c("0" = "ZDV only", "1" = "ZDV + ddI","2" = "ZZDV + Zal", "3" = "ddI only"))
+```
+
+From the bar plot, it seemed the ZDV + ddI is the best treatment which allows the patient has the longest survival time.
+
+### Correlation Heatmap of Karnofsky score against multiple CD cell counts
+```{r}
+library(ggplot2)
+library(reshape2)
+
+cor_data <- data %>% select(karnof, cd40, cd420, cd80, cd820)
+cor_matrix <- cor(cor_data, use = "complete.obs")
+melted_cor_matrix <- melt(cor_matrix)
+
+# Plot the heatmap
+ggplot(data = melted_cor_matrix, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                       midpoint = 0, limit = c(-1, 1), space = "Lab", 
+                       name = "Correlation") +
+  theme_minimal() + 
+  labs(title = "Correlation Heatmap: Karnofsky Score vs CD Cell Counts", 
+       x = "", y = "") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                   size = 12, hjust = 1))
+```
+
+The positive correlation between the Karnofsky score and CD4 counts suggests that patients with better functional abilities tend to have stronger immune responses, as indicated by CD4 counts. This makes sense because CD4 counts are a key indicator of immune health in AIDS patients. The weaker or negligible correlations with CD8 counts indicate that the CD8 cells may not have as strong a direct relationship with the Karnofsky score.

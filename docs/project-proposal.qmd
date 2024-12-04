@@ -1,0 +1,46 @@
+---
+title: "Project Proposal"
+subtitle: "Group #6"
+date: last-modified
+date-format: long
+format:
+  html:
+    theme: litera
+    embed-resources: true
+---
+
+# Team members
+
+- Zhuoyan Guo
+- Xue Qin  
+- Congfei Yin
+
+# Project
+
+## Project title: Predicting Aids Patient Survival Using Clinical Trial Data
+
+## Proposal
+
+The goal of this project is to predict Aids patient treatment failure (death) or survival (censoring) by comparing two different treatments and looking at the clinical factors such as patient demographics, treatment indicators, and clinical factors such as CD4 counts and Karnofsky scores.
+
+Methodology that will be included in this project would be survival analysis and machine learning methods. Kaplan-Meier Estimator and survival curve will help to compare the difference of using two treatments by visualizing probability of survival over time. The prediction models such as Linear Regression, Logistic Regression and Decision Tree will be used to predict the patients’ survival outcome. The evaluation of models will also proceed during the model development. While constructing the models, the project will involve identifying the most significant features that contribute to patient survival and evaluate their influence.
+
+Ultimately, this project will not only provide a reliable AIDS treatment outcomes prediction model but will also create clinical insights into how various treatments and various patients’ characteristics influence survival rates.
+
+
+## Data sources
+- dataset
+  - source URL: https://archive.ics.uci.edu/dataset/890/aids+clinical+trials+group+study+175
+  - is it public, or require registration: It’s a public dataset
+
+## Project planned timeline
+
+<!--- Provide a tentative timeline, keeping in mind project interim and final submission dates --->
+- Proposal Outline - Sep 30th
+- Data Understanding, Cleaning and EDA - Oct 6th
+- Literature Review - Oct 20th
+- Methodology and Code Development - Nov 3th
+- Presentation Preparation - Nov 24
+- Report Write Up - Dec 1
+
+- 3 Teammates will work together and hold bi-weely meetings discussing the project progress.
