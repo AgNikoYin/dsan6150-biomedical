@@ -54,7 +54,7 @@ The symptom and signs are as follows:
 
 * Logistic Regression
 
-* Logic Regression
+* Random Forest
 
 * Decision Tree
 
@@ -299,6 +299,7 @@ The slightly lower p-value (0.1182) indicates that the difference in class error
 
 - Symptom
 - CD4 counts at the baseline and 20 weeks.
+- Karnofsky score
 
 3. Which treatment method would be better?
 
