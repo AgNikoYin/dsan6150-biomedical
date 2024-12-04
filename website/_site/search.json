@@ -11,7 +11,10 @@
     "href": "index.html",
     "title": "Project Presentation",
     "section": "",
-    "text": "Zhuoyan Guo\nXue Qin\n\nCongfei Yin"
+    "text": "Zhuoyan Guo\nXue Qin\n\nCongfei Yin",
+    "crumbs": [
+      "Presentation"
+    ]
   },
   {
     "objectID": "EDA.html",
@@ -365,14 +368,20 @@
     "href": "index.html#introduction",
     "title": "Project Presentation",
     "section": "Introduction",
-    "text": "Introduction\n\nBackground\nHIV, or human immunodeficiency virus, is a virus that attacks the immune system by targeting white blood cells, making the body more vulnerable to illnesses like tuberculosis, infections, and certain cancers. Without treatment, HIV can progress over time to its most severe stage, AIDS (acquired immunodeficiency syndrome). The virus is transmitted through bodily fluids such as blood, breast milk, semen, and vaginal fluids, and can also be passed from mother to child.1\nThe symptom and signs are as follows:\n\nfever\nheadache\nrash\nsore throat\n\n\n\n\nHIV-Symptom\n\n\n\n\nData sources\n\nData URL\nIt’s a public dataset contains records of patients who were diagnosis with AIDS.\nThe data contained 2139 intances, include integer and catugoriacal variables\n\n\n\nProject Goal\nThe goal of this project is to predict Aids patient treatment failure (death) or survival (censoring) with a certain window of time by comparing two different treatments and looking at the clinical factors such as patient demographics, treatment indicators, and clinical factors such as CD4 counts and Karnofsky scores.\n\n\nMethods\n\nSurvival Analysis\nLogistic Regression\nLogic Regression\nDecision Tree\n\nMethodology that will be included in this project would be survival analysis and machine learning methods. Kaplan-Meier Estimator and survival curve will help to compare the difference of using two treatments by visualizing probability of survival over time. The prediction models such as Linear Regression, Logistic Regression and Decision Tree will be used to predict the patients’ survival outcome. The evaluation of models will also proceed during the model development.\n\n\nQuestions to address\n\nHow do patient demographics (e.g., age, gender, baseline health status) influence the effectiveness of different treatment methods on survival outcomes?\nWhat clinical features (e.g., CD4 counts, Karnofsky score) significantly impact survival outcomes for patients undergoing different treatments?\n\n\nWhich combination of CD4 counts and Karnofsky scores provides the most accurate prediction of patient outcomes for each treatment method?\n\n\nWhich treatment method would be better?\n\n\nHow do patient demographics (e.g., age, gender, baseline health status) influence the effectiveness of different treatment methods on survival outcomes?\n\n\nWhat are the most important indicators/features that better give the diagnois result?\n\n\nWhat are the most significant clinical factors influencing patient survival when considering CD cell counts and treatment methods?\n\n\nwhat is the best model to predict the diagnosis result?"
+    "text": "Introduction\n\nBackground\nHIV, or human immunodeficiency virus, is a virus that attacks the immune system by targeting white blood cells, making the body more vulnerable to illnesses like tuberculosis, infections, and certain cancers. Without treatment, HIV can progress over time to its most severe stage, AIDS (acquired immunodeficiency syndrome). The virus is transmitted through bodily fluids such as blood, breast milk, semen, and vaginal fluids, and can also be passed from mother to child.1\nThe symptom and signs are as follows:\n\nfever\nheadache\nrash\nsore throat\n\n\n\n\nHIV-Symptom\n\n\n\n\nData sources\n\nData URL\nIt’s a public dataset contains records of patients who were diagnosis with AIDS.\nThe data contained 2139 intances, include integer and catugoriacal variables\n\n\n\nProject Goal\nThe goal of this project is to predict Aids patient treatment failure (death) or survival (censoring) with a certain window of time by comparing two different treatments and looking at the clinical factors such as patient demographics, treatment indicators, and clinical factors such as CD4 counts and Karnofsky scores.\n\n\nMethods\n\nSurvival Analysis\nLogistic Regression\nLogic Regression\nDecision Tree\n\nMethodology that will be included in this project would be survival analysis and machine learning methods. Kaplan-Meier Estimator and survival curve will help to compare the difference of using two treatments by visualizing probability of survival over time. The prediction models such as Linear Regression, Logistic Regression and Decision Tree will be used to predict the patients’ survival outcome. The evaluation of models will also proceed during the model development.\n\n\nQuestions to address\n\nHow do patient demographics (e.g., age, gender, baseline health status) influence the effectiveness of different treatment methods on survival outcomes?\nWhat clinical features (e.g., CD4 counts, Karnofsky score) significantly impact survival outcomes for patients undergoing different treatments?\n\n\nWhich combination of CD4 counts and Karnofsky scores provides the most accurate prediction of patient outcomes for each treatment method?\n\n\nWhich treatment method would be better?\n\n\nHow do patient demographics (e.g., age, gender, baseline health status) influence the effectiveness of different treatment methods on survival outcomes?\n\n\nWhat are the most important indicators/features that better give the diagnois result?\n\n\nWhat are the most significant clinical factors influencing patient survival when considering CD cell counts and treatment methods?\n\n\nwhat is the best model to predict the diagnosis result?",
+    "crumbs": [
+      "Presentation"
+    ]
   },
   {
     "objectID": "index.html#exploratory-analysis",
     "href": "index.html#exploratory-analysis",
     "title": "Project Presentation",
     "section": "Exploratory Analysis",
-    "text": "Exploratory Analysis\n\nStatistic Summary"
+    "text": "Exploratory Analysis\n\nStatistic Summary",
+    "crumbs": [
+      "Presentation"
+    ]
   },
   {
     "objectID": "Decision_tree.html#conclusion",
