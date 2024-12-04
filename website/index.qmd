@@ -295,11 +295,10 @@ The slightly lower p-value (0.1182) indicates that the difference in class error
 - Gender
 - Antiretroviral History
 
-2. What clinical features (e.g., CD4 counts, Karnofsky score) significantly impact survival outcomes for patients undergoing different treatments?
+2. What clinical features (e.g., CD4 counts) significantly impact survival outcomes for patients undergoing different treatments?
 
 - Symptom
-- Karnofsky Score
-- CD4 counts at the baseline
+- CD4 counts at the baseline and 20 weeks.
 
 3. Which treatment method would be better?
 
