@@ -2,12 +2,14 @@ project:
   type: website
 
 website:
-  title: "DSAN 6150  Final Project"
+  title: "DSAN 6150 Final Project"
+
   sidebar:
     background: lightblue
     logo: "figures/logo.png"
 
     style: "docked"
+    
     contents:
       - href: presentation.qmd
         text: Presentation

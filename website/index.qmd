@@ -1,7 +1,79 @@
 ---
-title: "website"
+title: "Project Presentation"
+subtitle: "Group #6"
+date: last-modified
+date-format: long
+format:
+  html:
+    embed-resources: true
 ---
 
-This is a Quarto website.
+# Team members
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+- Zhuoyan Guo
+- Xue Qin  
+- Congfei Yin
+
+# Predicting Aids Patient Survival with Different Treatment
+
+[![](figures/aids_pic.png)](https://www.nfid.org/infectious-disease/hiv-aids/)
+
+## Introduction
+
+### Background
+
+  HIV, or human immunodeficiency virus, is a virus that attacks the immune system by targeting white blood cells, making the body more vulnerable to illnesses like tuberculosis, infections, and certain cancers. Without treatment, HIV can progress over time to its most severe stage, AIDS (acquired immunodeficiency syndrome). The virus is transmitted through bodily fluids such as blood, breast milk, semen, and vaginal fluids, and can also be passed from mother to child.[1](https://www.who.int/news-room/fact-sheets/detail/hiv-aids#:~:text=Human%20immunodeficiency%20virus%20(HIV)%20is,to%20have%20advanced%20HIV%20disease)
+
+The symptom and signs are as follows:
+
+* fever
+
+* headache
+
+* rash
+
+* sore throat
+
+[![HIV-Symptom](figures/hiv.png)](https://www.verywellhealth.com/hiv-aids-symptoms-4014373)
+
+### Data sources
+
+- [Data URL](https://archive.ics.uci.edu/dataset/890/aids+clinical+trials+group+study+175)
+
+- It’s a public dataset contains records of patients who were diagnosis with AIDS.
+  
+- The data contained 2139 intances, include integer and catugoriacal variables
+
+### Project Goal
+
+  The goal of this project is to predict Aids patient treatment failure (death) or survival (censoring) with a certain window of time by comparing two different treatments and looking at the clinical factors such as patient demographics, treatment indicators, and clinical factors such as CD4 counts and Karnofsky scores.
+
+### Methods
+
+* Survival Analysis
+
+* Logistic Regression
+
+* Logic Regression
+
+* Decision Tree
+
+Methodology that will be included in this project would be survival analysis and machine learning methods. Kaplan-Meier Estimator and survival curve will help to compare the difference of using two treatments by visualizing probability of survival over time. The prediction models such as Linear Regression, Logistic Regression and Decision Tree will be used to predict the patients’ survival outcome. The evaluation of models will also proceed during the model development.
+
+### Questions to address
+
+1. How do patient demographics (e.g., age, gender, baseline health status) influence the effectiveness of different treatment methods on survival outcomes?
+2. What clinical features (e.g., CD4 counts, Karnofsky score) significantly impact survival outcomes for patients undergoing different treatments?
+  - Which combination of CD4 counts and Karnofsky scores provides the most accurate prediction of patient outcomes for each treatment method?
+3. Which treatment method would be better?
+  - How do patient demographics (e.g., age, gender, baseline health status) influence the effectiveness of different treatment methods on survival outcomes?
+4. What are the most important indicators/features that better give the diagnois result?
+  - What are the most significant clinical factors influencing patient survival when considering CD cell counts and treatment methods?
+5. what is the best model to predict the diagnosis result?
+
+
+## Exploratory Analysis
+
+### Statistic Summary
+
+![](figures/eda/eda_stat.png)
