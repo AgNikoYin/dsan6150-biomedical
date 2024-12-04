@@ -11,7 +11,7 @@ website:
     style: "docked"
     
     contents:
-      - href: index.qmd
+      - href: presentation.qmd
         text: Presentation
       - href: project-proposal.qmd
         text: Home

@@ -9,7 +9,7 @@ format:
 This page presents an exploration of survival status outcomes based on the analysis of patient data using Decision Tree with different feature selection strategies. We select the features by sorting the feature importance with decision tree.
 
 
-We first fit in the decision tree model with all the features, the accuracy achieved **73.94%** wiith sensitivity of 77.14$, specificity 70.00%.
+We first fit in the decision tree model with all the features, the accuracy achieved **72.94%** wiith sensitivity of 77.14$, specificity 70.00%.
 
 The tree plot indicate cd420, d4420, age, preanti, and gender influence the predictions.
 
@@ -30,4 +30,4 @@ The tree plot shows numeric features like cd420, age, and cd4420 have precise th
 
 
 ## Conclusion
-With the selected feature from the feature importance function of decision, the accuracy, sensitivity and specificity score has not obviously improve. Thus we still decide to use the model fitted with all the features as our model outcome with an overall accuracy of **73.94%** wiith sensitivity of 77.14$, specificity 70.00%.
+With the selected feature from the feature importance function of decision, the accuracy, sensitivity and specificity score has not obviously improve. Thus we still decide to use the model fitted with all the features as our model outcome with an overall accuracy of **72.94%** wiith sensitivity of 77.14$, specificity 70.00%.

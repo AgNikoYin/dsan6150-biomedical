@@ -200,6 +200,15 @@ CD4 at Baseline
 
 ## Logistic Regression
 ### Model Analysis
+
+The dataset we are using in this analysis are the filtered and scaled version of the original dataset, we first scaled all  continues variables, and then filtered all observation with time larger than 950 to prevent issues of the unbalance dataset will bring to the prediction model.  
+
+![](figures/eda/eda_plot_2.png){width=80%}
+
+At time = 950, we have a similar sizes of patients with Cid=0 and Cid = 1.
+The original dataset has 2139 observations, 24 variables, and the modifed data has 851 observation.
+
+
 * Confusion matrix
 
 | **Prediction vs Actual** | 0 | 1 |
@@ -208,6 +217,9 @@ CD4 at Baseline
 | 1 | 26 | 115 |
 
 * Model Results
+
+
+![](figures/Logit/logit_plot_4.png){width=80%}
 
 Lasso Regression
 
@@ -222,9 +234,15 @@ Lasso Regression
 
 `offtrt`,  `cd420`, `race`,  `hemo`,  `symptom`, `drugs`, `gender`, `cd820`,  `age`, `strat`.
 
+`offtrt` and `cd420` are strong predictors of survival, showing a negative impact when their respective conditions worsen.
+`age` and `cd820` show positive associations with survival, highlighting potential protective effects or favorable prognostic indicators.
+These insights could inform clinical interventions by emphasizing the need to prioritize treatment adherence and monitor biomarkers like `cd420` and `cd820`.
+
 ## Decision Tree
 
 ### Model Analysis
+
+![](figures/DTree/dtree_plot_2.png){width=80%}
 
 * Confusion matrix
 
@@ -245,6 +263,13 @@ Lasso Regression
 
 ## Random Forest
 ### Model Analysis
+
+![](figures/randomforest/rf_plot_1.png){width=80%}
+
+After feature selection and hyperparameter tuning, the final model achieved an improved accuracy of 76.86%.
+Sensitivity (78.10%) improved, indicating better performance in identifying true positives.
+The specificity (76.00%) remained consistent, reflecting reliable identification of true negatives.
+The slightly lower p-value (0.1182) indicates that the difference in class errors is still not statistically significant, confirming balanced performance.
 
 * Confusion matrix
 
@@ -289,9 +314,9 @@ Tabel: Model Comparasion
 
 | Models  | Accuracy Results  | Important Features |
 |--------|--------|--------|
-| Logistic Regression  | 0.7608  | "offtrt"  "cd420" "race"  "hemo"  "symptom" "drugs" "gender" "cd820"  "age" "strat" |
-| Decision Tree   | 0.7294 | "cd420"   "offtrt"  "age"  "preanti"  "cd40"  "gender" |
-| Random Forest  | 0.7686 | "offtrt" "cd420" "preanti" "age" "homo" "z30" "strat" "gender" "cd40" "cd80" |
+| Logistic Regression  | 0.7725  | `offtrt` `cd420` `race` `hemo` `symptom` `drugs` `gender` `cd820` `age` `strat`. |
+| Decision Tree   | 0.7294 | `cd420` `offtrt`  `age`  `preanti`  `cd40`  `gender` |
+| Random Forest  | 0.7686 | `offtrt` `cd420` `preanti` `age` `homo` `z30` `strat` `gender` `cd40` `cd80` |
 
 4. What are the most important indicators/features that better give the diagnois result?
 
@@ -303,7 +328,7 @@ Tabel: Model Comparasion
 
 5. what is the best model to predict the diagnosis result?
 
-- Random Forest Model has the highest prediction accuracy in predicting the diagnosis result.
+- Logistic Regression has the highest prediction accuracy in predicting the diagnosis result.
 
 
 

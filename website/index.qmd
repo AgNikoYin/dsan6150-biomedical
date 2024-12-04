@@ -77,3 +77,259 @@ Methodology that will be included in this project would be survival analysis and
 ### Statistic Summary
 
 ![](figures/eda/eda_stat.png)
+
+* Average survival time is around 879.1 days
+
+* The age of patients range from 12 to 70 years old and the average age is 35.25 years old.
+
+*  The average weight is range from 31 kg to 159.94 kg and the average weight is 75.13kg
+
+
+### Feature Correlation Heatmap
+![](figures/eda/eda_plot_1.png){width=80%}
+
+* The warmer color shows the positive correlated relationship
+* variable cd820 (CD8 at 20+/-5 weeks) and cd80 (CD8 at baseline) are highly correlated
+* cd420(CD4 at 20+/-5 weeks) and cd40(CD4 at baseline)
+
+### Distribution of Counts of Treatment Group
+![](figures/eda/eda_plot_3.png){width=80%}
+
+* Each treatment group are almost equally distributed
+* Would not cause any bias about the final treatment results
+
+### Gender proportion by treatment group
+![](figures/eda/eda_plot_5.png){width=80%}
+
+* The number of male patients are much larger than female patients
+* Every treatment is balanced distributed
+
+
+### Relationship between CD4 and CD8 counts
+
+![](figures/eda/eda_plot_6.png){width=80%}
+
+* No big difference between CD4 and CD8 in each treatment group
+* No clear trend that shows the relationship between CD4 and CD8
+
+### Pie Chart for Diagnoisis Outcome distribution
+![](figures/eda/eda_plot_8.png){width=80%}
+
+### Correlation Heatmap of Karnofsky score
+
+![](figures/eda/eda_plot_10.png){width=80%}
+
+* The positive correlation between the Karnofsky score and CD4 counts suggests that patients with better functional abilities
+
+
+## Survival Analysis
+
+By applying Survival Analysis, we want to answer the following questions:
+
+1. What are the survival probabilities associated with different treatment methods?
+
+2. How do clinical indicators or demographic factors affect survival outcomes?
+
+We focus on estimating survival probabilities and comparing different groups using Kaplan-Meier curves and the Cox Proportional Hazards model.
+
+### Kaplan-Meier
+1. Analyze Survival Probabilities Across Treatments
+
+![Kaplan-Meier Curve for All Treatments](figures/survival/surv_plot_1.png){width=600 height=400}
+
+- trt=0 showing a significant worse outcomes compared to the other three treatments indicating by the p-value < 0.0001.
+
+- Patients who toke trt=1, trt=2, and trt=3 shows similar survival curves.
+
+2. Focus on Effective Treatments: Survival Differences in trt=1,2,3
+
+![Kaplan-Meier Curve for Treatments 1, 2, and 3](figures/survival/surv_plot_2.png){width=700 height=400}
+
+- The survival probabilities across these treatments are nearly indistinguishable according to the p-value = 0.4.
+- This similarity implies that external factors -- other than treatments themselves --may play a role in shaping the survival outcomes.
+
+3. Explore Factors That Affect Survival Probabilities Using the Bootstrap Method
+
+Gender: 
+
+- For trt=0, gender significantly impacts survival probabilities (p-value = 0.024), with female showing higher survival probabilities. 
+- Gender differences are less significant for trt=1, trt=2, and trt=3 (p-values = 0.35, 0.061, and 0.79).
+
+![Survival Curves Stratified by Gender](figures/survival/surv_plot_3.png){width=1000 height=700}
+
+ARV History:
+
+- ARV history means the whether the patient has ever taken the antiretroviral treatments, which is the treatment of HIV/AIDS involves treatment of opportunistic infections, prophylaxis, and antiretroviral (ARV) therapy.
+- Using trt=1, antiretroviral history (naive vs. experienced) does not significantly impact survival outcomes for patients.
+- Using trt=0, trt=2, and trt=3, ARV history has a substantial impact on survival probabilities. Patients with prior ARV treatment show significantly lower survival probabilities compared to naive patients due to the impact of drug resistance.
+
+![Survival Curves Stratified by ARV History](figures/survival/surv_plot_5.png){width=1000 height=700}
+
+Symptom
+
+- For trt=0 and trt=3, the p-values (0.11 and 0.38) indicate no statistically significant difference in survival probabilities between symptomatic and asymptomatic patients.
+- For trt=1, the p-value (0.0039) shows a significant difference, where asymptomatic patients exhibit slightly better survival probabilities compared to symptomatic patients.
+
+![Survival Curves Stratified by Symptom](figures/survival/surv_plot_6.png){width=1000 height=700}
+
+Karnofsky Score
+
+- Karnofsky score measures a patient's functional status on a scale from 0 to 100, with higher scores indicating better physical capability and ability to carry out daily activities.
+- There is no significant difference in survival probabilities for patients using treatment 0, 1, and 3.
+- Karnofsky score quartiles significantly impact survival probabilities (p = 0.038), with higher quartiles (Q3 and Q4) associated with improved survival outcomes if patients receiving trt=2.
+
+![Survival Curves Stratified by Karnofsky Quantile](figures/survival/surv_plot_8.png){width=1000 height=700}
+
+CD4 at Baseline
+
+- The CD4 cell count is a critical measure of immune system health, which reflects the number of CD4 T-helper cells in the blood, which are essential for immune function.
+- There is a consistent and significant impact of CD4 quartiles on survival probabilities across all treatment groups: survival probabilities significantly improve with higher CD4 quantiles, saying that immune status is a key determinant of survival outcomes for all groups and patients with higher CD4 consistently demonstrate better survival probabilities.
+
+![Survival Curves Stratified by CD4 Quantile](figures/survival/surv_plot_10.png){width=1000 height=700}
+
+### Cox Proportional Hazard Models
+
+- The Kaplan-Meier (KM) curves provide a fundational view of survival probabilities by visualizing unadjusted survival outcomes across different strata.
+- The Cox proportional hazards model is a semi-parametric approach that allows for the simultaneous inclusion of multiple covariates. And it can adjust for confounding factors, ensuring a clearer understanding of each variable's independent effect on survival.
+
+1. Cox Model with Interaction Terms
+
+![Adjusted Survival Curves by Treatment](figures/survival/surv_plot_12.png){width=600 height=400}
+
+
+
+## Logistic Regression
+### Model Analysis
+
+The dataset we are using in this analysis are the filtered and scaled version of the original dataset, we first scaled all  continues variables, and then filtered all observation with time larger than 950 to prevent issues of the unbalance dataset will bring to the prediction model.  
+
+![](figures/eda/eda_plot_2.png){width=80%}
+
+At time = 950, we have a similar sizes of patients with Cid=0 and Cid = 1.
+The original dataset has 2139 observations, 24 variables, and the modifed data has 851 observation.
+
+
+* Confusion matrix
+
+| **Prediction vs Actual** | 0 | 1 |
+|---|---|----|
+| 0 |  79  | 35 |
+| 1 | 26 | 115 |
+
+* Model Results
+
+
+![](figures/Logit/logit_plot_4.png){width=80%}
+
+Lasso Regression
+
+| Metric  | Value  |
+|--------|--------|
+| Accuracy  | 77.25% |
+| Sensitivity   | 0.7810   |
+| Specificity   | 0.7667   |
+| p-value | 4.321e-10 |
+
+### Feature Impoartance
+
+`offtrt`,  `cd420`, `race`,  `hemo`,  `symptom`, `drugs`, `gender`, `cd820`,  `age`, `strat`.
+
+`offtrt` and `cd420` are strong predictors of survival, showing a negative impact when their respective conditions worsen.
+`age` and `cd820` show positive associations with survival, highlighting potential protective effects or favorable prognostic indicators.
+These insights could inform clinical interventions by emphasizing the need to prioritize treatment adherence and monitor biomarkers like `cd420` and `cd820`.
+
+## Decision Tree
+
+### Model Analysis
+
+![](figures/DTree/dtree_plot_2.png){width=80%}
+
+* Confusion matrix
+
+![](figures/DTree/dtree_plot_3.png){width=80%}
+
+* Model Results
+
+| Metric  | Value  |
+|--------|--------|
+| Accuracy  | 72.94%  |
+| Sensitivity   | 0.7714   |
+| Specificity   | 0.7000  |
+| p-value | 1.863e-06  |
+
+### Feature Impoartance
+
+`cd420`, `offtrt`, `age`, `preanti`, `cd40`, `gender`
+
+## Random Forest
+### Model Analysis
+
+![](figures/randomforest/rf_plot_1.png){width=80%}
+
+After feature selection and hyperparameter tuning, the final model achieved an improved accuracy of 76.86%.
+Sensitivity (78.10%) improved, indicating better performance in identifying true positives.
+The specificity (76.00%) remained consistent, reflecting reliable identification of true negatives.
+The slightly lower p-value (0.1182) indicates that the difference in class errors is still not statistically significant, confirming balanced performance.
+
+* Confusion matrix
+
+|  | 0 | 1| 
+|--------|--------|--------|
+| 0 | 82 | 36 | 
+| 1 | 23 | 114 |
+
+* Model Results
+
+| Metric  | Value  |
+|--------|--------|
+| Accuracy  | 76.86%  |
+| Sensitivity   | 0.7810   |
+| Specificity   | 0.7600   |
+| p-value | 0.1182   |
+
+### Feature Impoartance
+`offtrt`, `cd420`, `preanti`, `age`, `homo`, `z30`, `strat`, `gender`, `cd40`, `cd80`
+
+
+## Conclusion
+
+### Answer to Questions
+
+1. How do patient demographics (e.g., age, gender, baseline health status) influence the effectiveness of different treatment methods on survival outcomes?
+
+- Gender
+- Antiretroviral History
+
+2. What clinical features (e.g., CD4 counts, Karnofsky score) significantly impact survival outcomes for patients undergoing different treatments?
+
+- Symptom
+- Karnofsky Score
+- CD4 counts at the baseline
+
+3. Which treatment method would be better?
+
+- trt=0 is the worst while other three treatments don't have significant difference.
+
+Tabel: Model Comparasion
+
+| Models  | Accuracy Results  | Important Features |
+|--------|--------|--------|
+| Logistic Regression  | 0.7725  | `offtrt` `cd420` `race` `hemo` `symptom` `drugs` `gender` `cd820` `age` `strat`. |
+| Decision Tree   | 0.7294 | `cd420` `offtrt`  `age`  `preanti`  `cd40`  `gender` |
+| Random Forest  | 0.7686 | `offtrt` `cd420` `preanti` `age` `homo` `z30` `strat` `gender` `cd40` `cd80` |
+
+4. What are the most important indicators/features that better give the diagnois result?
+
+- gender
+- age
+- offtrt: indicator of off-trt before 96+/-5 weeks (0=no,1=yes)
+- cd420: CD4 at 20+/-5 weeks
+
+
+5. what is the best model to predict the diagnosis result?
+
+- Logistic Regression has the highest prediction accuracy in predicting the diagnosis result.
+
+
+
+
