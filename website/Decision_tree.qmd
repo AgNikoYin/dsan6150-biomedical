@@ -28,6 +28,10 @@ The tree plot shows numeric features like cd420, age, and cd4420 have precise th
 
 ![](figures/DTree/dtree_plot_3.png)
 
+![](figures/DTree/dtree_plot_4.png)
+
+Both Decision Tree models has the exact same ROC curve with AUC value 0.739.
+
 
 ## Conclusion
 With the selected feature from the feature importance function of decision, the accuracy, sensitivity and specificity score has not obviously improve. Thus we still decide to use the model fitted with all the features as our model outcome with an overall accuracy of **72.94%** wiith sensitivity of 77.14$, specificity 70.00%.

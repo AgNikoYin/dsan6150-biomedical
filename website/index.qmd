@@ -42,7 +42,7 @@ The symptom and signs are as follows:
 
 - It’s a public dataset contains records of patients who were diagnosis with AIDS.
   
-- The data contained 2139 instances, include integer and categorical variables
+- The data contained 2139 intances, include integer and catugoriacal variables
 
 ### Project Goal
 
@@ -54,7 +54,7 @@ The symptom and signs are as follows:
 
 * Logistic Regression
 
-* Random Forest
+* Logic Regression
 
 * Decision Tree
 
@@ -115,6 +115,11 @@ Methodology that will be included in this project would be survival analysis and
 ### Pie Chart for Diagnoisis Outcome distribution
 ![](figures/eda/eda_plot_8.png){width=80%}
 
+### Correlation Heatmap of Karnofsky score
+
+![](figures/eda/eda_plot_10.png){width=80%}
+
+* The positive correlation between the Karnofsky score and CD4 counts suggests that patients with better functional abilities
 
 
 ## Survival Analysis
@@ -196,41 +201,41 @@ CD4 at Baseline
 ## Logistic Regression
 ### Model Analysis
 
-The dataset we are using in this analysis are the filtered and scaled version of the original dataset, we first scaled all  continues variables, and then filtered all observation with time larger than 950 to prevent issues of the unbalance dataset will bring to the prediction model.  
+The dataset we are using in this analysis are the filtered and scaled version of the original dataset, we first scaled all  continues variables, and then set the landmark at time = 1000, we kept every observation failed before time=1000 and everyone who is still alive at time-1000, sample 503 observations out of each groups of data to prevent issues of the unbalance dataset will bring to the prediction model.  
 
 ![](figures/eda/eda_plot_2.png){width=80%}
 
-At time = 950, we have a similar sizes of patients with Cid=0 and Cid = 1.
-The original dataset has 2139 observations, 24 variables, and the modifed data has 851 observation.
+At time = 1000, we have a similar sizes of patients with Cid=0 and Cid = 1.
+The original dataset has 2139 observations, 24 variables, and the modifed data has 1006 observation.
 
 
 * Confusion matrix
 
 | **Prediction vs Actual** | 0 | 1 |
 |---|---|----|
-| 0 |  79  | 35 |
-| 1 | 26 | 115 |
+| 0 |  120  | 46 |
+| 1 | 30 | 104 |
 
 * Model Results
 
 
 ![](figures/Logit/logit_plot_4.png){width=80%}
 
-Lasso Regression
+Backward Selection
 
 | Metric  | Value  |
 |--------|--------|
-| Accuracy  | 77.25% |
-| Sensitivity   | 0.7810   |
-| Specificity   | 0.7667   |
-| p-value | 4.321e-10 |
+| Accuracy  | 74.67% |
+| Sensitivity   | 0.8000   |
+| Specificity   | 0.6933   |
+| p-value | < 2e-16  |
 
 ### Feature Impoartance
 
-`offtrt`,  `cd420`, `race`,  `hemo`,  `symptom`, `drugs`, `gender`, `cd820`,  `age`, `strat`.
+`karnof`, `symptom`, `offtrt`, `cd420`, `cd820`.
 
 `offtrt` and `cd420` are strong predictors of survival, showing a negative impact when their respective conditions worsen.
-`age` and `cd820` show positive associations with survival, highlighting potential protective effects or favorable prognostic indicators.
+`cd820` show positive associations with survival, highlighting potential protective effects or favorable prognostic indicators.
 These insights could inform clinical interventions by emphasizing the need to prioritize treatment adherence and monitor biomarkers like `cd420` and `cd820`.
 
 ## Decision Tree
@@ -241,46 +246,54 @@ These insights could inform clinical interventions by emphasizing the need to pr
 
 * Confusion matrix
 
-![](figures/DTree/dtree_plot_3.png){width=80%}
+| **Prediction vs Actual** | 0 | 1 |
+|---|---|----|
+| 0 |  123  | 57 |
+| 1 | 27 | 93 |
+
+![](figures/DTree/dtree_plot_4.png){width=80%}
 
 * Model Results
 
 | Metric  | Value  |
 |--------|--------|
-| Accuracy  | 72.94%  |
-| Sensitivity   | 0.7714   |
-| Specificity   | 0.7000  |
-| p-value | 1.863e-06  |
+| Accuracy  | 72%  |
+| Sensitivity   | 0.8200   |
+| Specificity   | 0.6200  |
+| p-value | 7.335e-15  |
 
 ### Feature Impoartance
 
-`cd420`, `offtrt`, `age`, `preanti`, `cd40`, `gender`
+`cd420`, `offtrt`, `age`, `preanti`, `cd40`, `wtkg`, `cd820`
+
 
 ## Random Forest
 ### Model Analysis
 
 ![](figures/randomforest/rf_plot_1.png){width=80%}
 
-After feature selection and hyperparameter tuning, the final model achieved an improved accuracy of 76.86%.
-Sensitivity (78.10%) improved, indicating better performance in identifying true positives.
-The specificity (76.00%) remained consistent, reflecting reliable identification of true negatives.
-The slightly lower p-value (0.1182) indicates that the difference in class errors is still not statistically significant, confirming balanced performance.
+After feature selection and hyperparameter tuning, the final model achieved an improved accuracy of 70.33%.
+Sensitivity (76%) improved, indicating better performance in identifying true positives.
+The specificity (64.00%) remained consistent, reflecting less reliable identification of true negatives.
+
 
 * Confusion matrix
 
 |  | 0 | 1| 
 |--------|--------|--------|
-| 0 | 82 | 36 | 
-| 1 | 23 | 114 |
+| 0 | 114 | 53 | 
+| 1 | 36 | 97 | 
 
 * Model Results
 
 | Metric  | Value  |
 |--------|--------|
-| Accuracy  | 76.86%  |
-| Sensitivity   | 0.7810   |
-| Specificity   | 0.7600   |
-| p-value | 0.1182   |
+| Accuracy  | 0.7033 |
+| Sensitivity   | 0.7600 |
+| Specificity   | 0.6467 |
+| p-value | 6.97e-13 |
+
+![](figures/randomforest/rf_plot_4.png){width=80%}
 
 ### Feature Impoartance
 `offtrt`, `cd420`, `preanti`, `age`, `homo`, `z30`, `strat`, `gender`, `cd40`, `cd80`
@@ -295,11 +308,11 @@ The slightly lower p-value (0.1182) indicates that the difference in class error
 - Gender
 - Antiretroviral History
 
-2. What clinical features (e.g., CD4 counts) significantly impact survival outcomes for patients undergoing different treatments?
+2. What clinical features (e.g., CD4 counts, Karnofsky score) significantly impact survival outcomes for patients undergoing different treatments?
 
 - Symptom
-- CD4 counts at the baseline and 20 weeks.
-- Karnofsky score
+- Karnofsky Score
+- CD4 counts at the baseline
 
 3. Which treatment method would be better?
 
@@ -309,11 +322,11 @@ Tabel: Model Comparasion
 
 | Models  | Accuracy Results  | Important Features |
 |--------|--------|--------|
-| Logistic Regression  | 0.7725  | `offtrt` `cd420` `race` `hemo` `symptom` `drugs` `gender` `cd820` `age` `strat`. |
-| Decision Tree   | 0.7294 | `cd420` `offtrt`  `age`  `preanti`  `cd40`  `gender` |
-| Random Forest  | 0.7686 | `offtrt` `cd420` `preanti` `age` `homo` `z30` `strat` `gender` `cd40` `cd80` |
+| Logistic Regression  | 0.7467  | `karnof`, `symptom`, `offtrt`, `cd420`, `cd820` |
+| Decision Tree   | 0.72 | `cd420`, `offtrt`, `age`, `preanti`, `cd40`, `wtkg`, `cd820` |
+| Random Forest  | 0.7033 | `offtrt` `cd420` `preanti` `age` `homo` `z30` `strat` `gender` `cd40` `cd80` |
 
-4. What are the most important indicators/features that better give the diagnosis result?
+4. What are the most important indicators/features that better give the diagnois result?
 
 - gender
 - age

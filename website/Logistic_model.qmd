@@ -13,34 +13,34 @@ This page presents an exploration of survival status outcomes based on the analy
 
 ## Data Preparation
 
-The dataset we are using in this analysis are the filtered and scaled version of the original dataset, we first scaled all  continues variables, and then filtered all observation with time larger than 950 to prevent issues of the unbalance dataset will bring to the prediction model.  
+The dataset we are using in this analysis are the filtered and scaled version of the original dataset, we first scaled all  continues variables, and then set the landmark at 1000, drop all cid=0 to prevent issues of the unbalance dataset will bring to the prediction model.  
 
 ![](figures/eda/eda_plot_2.png)
-At time = 950, we have a similar sizes of patients with Cid=0 and Cid = 1.
-The original dataset has 2139 observations, 24 variables, and the modifed data has 851 observation.
+At time = 1000, we have a similar sizes of patients with Cid=0 and Cid = 1.
+The original dataset has 2139 observations, 24 variables, and the modifed data has 1006 observation.
 
 Original Dataset:
 
 | Dataset          | Cid= 0 | Cid= 1|
 |------------------|--------|-------|
 | Original Dataset |  1627  |  521  |
-| Modified Dataset |  377   |  474  |
+| Modified Dataset |  503   |  503  |
 
 
 ## Initial Model and Performance
 
 The initial logistic regression model used all 22 features and target variable `cid`, which is the status of patients. We split the dataset into training and testing sets with 7:3 ratio.
 
-This model achieved an accuracy of **75.29%** with  95% CI  (0.6953, 0.8046) on the test set and demonstrated strong discriminatory ability, significant predictors identified in the model included age, hemoglobin levels `hemo`, drug use `drugs`, and pre-antiretroviral treatment status `preanti`, among others.
+This model achieved an accuracy of **72%**  on the test set and demonstrated strong discriminatory ability, significant predictors identified in the model included age, hemoglobin levels `hemo`, drug use `drugs`, and pre-antiretroviral treatment status `preanti`, among others.
 
 
 ![](figures/Logit/logit_plot_1.png)
-The Initial mode has an AUC value of **0.845**.
+The Initial mode has an AUC value of **0.7812**.
 
 ### fit with selected features with P<0.05
 
 We choose features with p<0.05 and used them on the refine model. 
-The refined model has an accuracy of **74.51%**, with 95% CI : (0.687, 0.7974), lower than the original model, thus we reject this model.
+The refined model has an accuracy of **71%**, lower than the original model, thus we reject this model.
 
 
 ## Lasso Regression
@@ -48,9 +48,9 @@ The refined model has an accuracy of **74.51%**, with 95% CI : (0.687, 0.7974), 
 We employed the Lasso regression to enhance feature selection and improve model interpretability.
 
 The Lasso regression applies L1 penalty, set less relevant features with a coefficient of 0. Using cross-validation, the optimal penalty parameter (lambda) was determined to be the value that minimized the cross-validated error.
-The features we choosed using lasso regression are `offtrt`,  `cd420`, `race`,  `hemo`,  `symptom`, `drugs`, `gender`, `cd820`,  `age`, `strat`.
+The features we choosed using lasso regression are `offtrt`,  `cd420`, `race`,  `symptom`, `drugs`,`treat`, `cd820`,  `strat`.
 
-The model has an accuracy of **77.25%** with 95% CI : (0.7161, 0.8225), and AUC value of **0.8523**. 
+The model has an accuracy of **72.67%**, and AUC value of **0.797**. 
 ![](figures/Logit/logit_plot_2.png)
 
 The Lasso model has a better performance than the initial logistic regression model with better discriminative power.
@@ -59,47 +59,43 @@ The Lasso model has a better performance than the initial logistic regression mo
 ## Backward Selection
 
 We then apply backward selection for feature selection starting from the full model. The process will drop features with the highest p-values and retain only statistically significant predictors.
-The features we kept are: `age`, `hemo`,`drugs`, `preanti`, `race`, `gender`, `symptom`, `offtrt`, `cd420`, `cd820`.
+The features we kept are: `karnof`, `symptom`, `offtrt`, `cd420`, `cd820`.
 
-The model after using these features has a accuracy of **76.08%** 
+The model after using these features has a accuracy of **74.67%** 
 with 95% CI : (0.7036, 0.8118). 
 ![](figures/Logit/logit_plot_3.png)
-The model also has an AUC value of **0.8465**.
+The model also has an AUC value of **0.7924**.
 
-Backward selection give as a better performance than the full model, but not better than the model using lasso regression.
+Backward selection give the best performance out of all three models     .
 
 ## Conclusion
 
 ![](figures/Logit/logit_plot_4.png)
-In Logistic Regression section, we find that the model using Lasso Regression has the best performance as it achieved the highest accuracy (**77.25%**) and the AUC value (**0.8523**) among all 3 models.
+In Logistic Regression section, we find that the model using backward selection has the best performance as it achieved the highest accuracy (**77.25%**) and the AUC value (**0.8523**) among all 3 models.
 
-| Predictor   | Coefficient | p-value       |
-|-------------|-------------|---------------|
-| (Intercept) | 0.4732      | 0.258060      |
-| offtrt      | -2.1913     | < 2e-16       |
-| cd420       | -1.2377     | < 2e-16       |
-| race        | -0.8098     | 0.000732      |
-| hemo        | -0.8014     | 0.042248 *    |
-| symptom     | 0.4734      | 0.088398 .    |
-| drugs       | -0.5833     | 0.051795 .    |
-| gender      | 0.4414      | 0.131602      |
-| cd820       | 0.3972      | 0.000623 **   |
-| age         | 0.3259      | 0.004113 **   |
-| strat       | 0.3658      | 0.004475 **   |
+| Predictor   | Coefficient | p-value        |
+|-------------|-------------|----------------|
+| (Intercept) | 3.47756     | 0.018162 *     |
+| karnof      | -0.03901    | 0.010080 *     |
+| symptom     | 0.58024     | 0.014384 *     |
+| treat       | -0.68194    | 0.000907 ***   |
+| offtrt      | 1.23530     | 1.12e-09 ***   |
+| cd420       | -1.09290    | < 2e-16 ***    |
+| cd80        | 0.13870     | 0.124861       |
 
 `offtrt` and `cd420` are strong predictors of survival, showing a negative impact when their respective conditions worsen.
-`age` and `cd820` show positive associations with survival, highlighting potential protective effects or favorable prognostic indicators.
+`cd820` show positive associations with survival, highlighting potential protective effects or favorable prognostic indicators.
 These insights could inform clinical interventions by emphasizing the need to prioritize treatment adherence and monitor biomarkers like `cd420` and `cd820`.
 
 The Lasso has a confusion matrix of this:
 
 | Prediction | Actual | 0  | 1 |
 |---|---|---|----|
-|          0 |  |  79  | 35 |
-|          1 |  | 26 | 115 |
+|          0 |  |  120  | 46 |
+|          1 |  | 30 | 104 |
 
 
 
-The lasso regression balanced the predictive power and feature selection through regularization. while backward selection giving a slightly less complex model with similar accuracy and AUC. The confusion matrix also validate the accuracy was not affected by the high ratio between cid=1 and cid =0 as we filterd the data ealier.
+The lasso balanced the predictive power and feature selection through regularization with better AUC. while backward selection giving a slightly less complex model with better accuracy. The confusion matrix also validate the accuracy was not affected by the high ratio between cid=1 and cid =0 as we filtered the data earlier.
 
 

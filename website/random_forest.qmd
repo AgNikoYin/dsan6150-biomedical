@@ -15,12 +15,6 @@ Before training the Random Forest model, two preprocessing steps were taken to e
 
 For numerical variables that are not categorical, scaling was applied to standardize their ranges. This ensures that all continuous variables are on a comparable scale, and prevents variables with larger ranges from disproportionately influence the model.
 
-Additionally, we filtered the dataset to include only observations where time < 290. This threshold was chosen because it ensured an even distribution of the outcome variable cid (value 0 and 1). It is important to maintain a balanced dataset in order to reduce the potential bias in the model and improve its ability to generalize to new data.
-
-|  | Before Filtering | After Filtering | 
-|--------|--------|--------|
-| cid = 0 | 1627 | 377 | 
-| cid = 1 | 521 | 474 | 
 
 Also, for training and evaluating purpose, the dataset was split into a training set and a testing set where 70% of the data used to train the model while the remaining 30% of the data is used for evaluation.
 
@@ -89,11 +83,13 @@ To avoid overfitting and validate the model effectively, cross-validation is app
 
 By using 10-Fold Cross-Validation, the data is split into 10 subsets (folds), and the model is trained on 9 folds while the 10th is used for validation. This process repeats for all folds.
 
-| mtry | Accuracy | Kappa| 
-|--------|--------|--------|
-| 2 | 0.7884371 | 0.5725548 |
-| 3 | 0.8086075 | 0.6140662 |
-| 4 | 0.8187196 | 0.6346514 |
+| mtry | Accuracy   | Kappa      |
+|------|------------|------------|
+| 2    | 0.6941307  | 0.3883214  |
+| 5    | 0.6941407  | 0.3883059  |
+| 9    | 0.6856601  | 0.3713512  |
+| 13   | 0.6827828  | 0.3655533  |
+| 17   | 0.6743121  | 0.3485363  |    
 
 Besides, the mtry parameter (number of variables considered at each split) is tuned by testing values 2, 3, and 4. And the train function identifies the optimal mtry based on cross-validation accuracy which is mtry=4 being used on the final model.
 
@@ -103,21 +99,22 @@ Table: Confusion Matrix of Tuned Random Forest Model on Test Dataset
 
 |  | 0 | 1| 
 |--------|--------|--------|
-| 0 | 82 | 36 | 
-| 1 | 23 | 114 | 
+| 0 | 114 | 53 | 
+| 1 | 36 | 97 | 
 
 
-After training the Random Forest model with cross-validation and selecting the optimal number of variables at each split (mtry = 4), the model was evaluated on the test dataset. The model achieved an accuracy of 76.86%, with a 95% confidence interval of (71.19%, 81.90%). This indicates that approximately 77% of the predictions were correct.The model correctly identified 78.10% of instances belonging to class 0 and correctly identified 76.00% of instances belonging to class 1.
+After training the Random Forest model with cross-validation and selecting the optimal number of variables at each split (mtry = 4), the model was evaluated on the test dataset. The model achieved an accuracy of **70.33%**. This indicates that approximately 77% of the predictions were correct.The model correctly identified 78.10% of instances belonging to class 0 and correctly identified 76.00% of instances belonging to class 1.
 
+![](figures/randomforest/rf_plot_4.png)
 
 Table: Tuned Random Forest Model Result
 
 | Metric  | Value  |
 |--------|--------|
-| Accuracy  | 0.7686 |
-| Sensitivity   | 0.7810 |
-| Specificity   | 0.7600 |
-| p-value | 0.1182 |
+| Accuracy  | 0.7033 |
+| Sensitivity   | 0.7600 |
+| Specificity   | 0.6467 |
+| p-value | 6.97e-13 |
 
 
 In conclusion, the Random Forest model performed well on unseen data, achieving high accuracy and balanced performance across both classes. The sensitivity and specificity metrics suggest that the model effectively identifies both outcomes, with slightly better performance for class 0. Although some misclassifications remain, the results indicate that the model is robust and suitable for predicting the target variable (cid). 

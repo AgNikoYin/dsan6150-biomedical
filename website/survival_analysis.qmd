@@ -82,7 +82,25 @@ The Kaplan-Meier (KM) curves provide a fundational view of survival probabilitie
 
 The Cox proportional hazards model is a semi-parametric approach that allows for the simultaneous inclusion of multiple covariates. And it can adjust for confounding factors, ensuring a clearer understanding of each variable's independent effect on survival. Besides, it can explore interactions between variables, such as the influence of treatment (trt) on survival, stratified by CD40 levels or Karnofsky scores.
 
-### 1. Cox Model with Interaction Terms
+### 1. Cox Model
+
+First, we developed a cox model that included all the features in the dataset. With a Concordance = 0.773 indicationg good alignment between predicted and observed survival outcomes. 
+
+And based on this model result, we should priortize the following features for the next model based on the p-values we derived:
+
+1. Treatment Groups (trt1, trt2, trt3): These variables were highly statistically significant (p < 0.001) and showed a substantial reduction in hazard (hazard ratios between 0.60 and 0.66), highlighting their critical influence on survival outcomes.
+
+2. Symptom (symptom): This feature significantly increased hazard (HR=1.41,p<0.001), indicating that this symptom is an important predictor of worse outcomes.
+
+3. Drugs (drugs): This variable was statistically significant (p=0.034) and associated with a 28% reduction in hazard (HR=0.72), suggesting it plays a protective role.
+
+4. Pre-antibiotics (preanti): Although the hazard ratio was close to 1 (HR=1.00), the feature was highly statistically significant (p=0.002), indicating it may still have an important but subtle effect.
+
+5. CD4-related Variables (cd40, cd420, cd820): These variables consistently showed statistical significance (p<0.01) with modest but meaningful impacts on hazard, suggesting their role in survival prediction.
+
+However, the GLOBAL p-value indicates that the proportional hazards assumption is violated for the overall model. Mainly driven by offtrt, cd40, cd420.
+
+### 2. Cox Model with Interaction Terms
 
 By running a Cox model that includes interaction terms to evaluate how the effect of treatment (trt) on survival changes depending on patient characteristics (e.g., Karnofsky score, CD40 level, ARV History and symptom presence), this Adjusted Survival Curves is derived.
 
@@ -109,7 +127,7 @@ Table: P-values from Schoenfeld Residual Test
 
 However, the Schoenfeld residual test output above reveals that there is significant violations of the proportional hazards assumptions since the p-value for global test is 0.0087. Also, specific variables, such as cd40 (p = 0.00027) and the interaction trt:cd40 (p = 0.00037), show significant violations, suggesting that their effects on the hazard ratio change over time. This suggesting that a stratified approach was necessary.
 
-### 2. Stratified Cox Model
+### 3. Stratified Cox Model
 
 By stratifying on CD4 at baseline, the model accounts for its non-proportional effect while allowing the estimation of hazard ratios for other covariates (e.g., treatment, Karnofsky score) within each CD40 stratum.
 

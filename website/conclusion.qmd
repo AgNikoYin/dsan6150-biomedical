@@ -40,9 +40,9 @@ Tabel: Model Comparasion
 
 | Models  | Accuracy Results  | Important Features |
 |--------|--------|--------|
-| Logistic Regression  | 0.7608  | "offtrt"  "cd420" "race"  "hemo"  "symptom" "drugs" "gender" "cd820"  "age" "strat" |
-| Decision Tree   | 0.7294 | "cd420"   "offtrt"  "age"  "preanti"  "cd40"  "gender" |
-| Random Forest  | 0.7686 | "offtrt" "cd420" "preanti" "age" "homo" "z30" "strat" "gender" "cd40" "cd80" |
+| Logistic Regression  | 0.7467  | `karnof`, `symptom`, `offtrt`, `cd420`, `cd820` |
+| Decision Tree   | 0.72 | `cd420`, `offtrt`, `age`, `preanti`, `cd40`, `wtkg`, `cd820` |
+| Random Forest  | 0.7033 | `offtrt` `cd420` `preanti` `age` `homo` `z30` `strat` `gender` `cd40` `cd80` |
 
 # 4. What are the most important indicators/features that better give the diagnois result?
 
@@ -51,7 +51,7 @@ By analyzing the important features selected by the three models -- Logistic Reg
 
 # 5. what is the best model to predict the diagnosis result?
 
-By comparing the prediction accuracy of these three models, we can conclude that Random Forest Model is the best model to predict the diagnosis result achieving an accuracy of 76.86%. This slightly outperforms Logistic Regression (76.08%) and significantly surpasses the Decision Tree model (72.94%). Additionally, it identifies the most important features (e.g., offtrt, CD4 counts, and age) while achieving robust predictive performance. Therefore, the Random Forest model emerges as the most reliable option for predicting the diagnosis result.
+By comparing the prediction accuracy of these three models, we can conclude that Logistic Regression Model is the best model to predict the diagnosis result achieving an accuracy of 74.87%. This slightly outperforms Decision Tree (72%) and significantly surpasses the Random Forest  model (70.33%). Additionally, it identifies the most important features (e.g., offtrt, CD4 counts, and age) while achieving robust predictive performance. Therefore, the Random Forest model emerges as the most reliable option for predicting the diagnosis result.
 
 
 
